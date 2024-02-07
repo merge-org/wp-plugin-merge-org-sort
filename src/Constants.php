@@ -28,6 +28,16 @@ final class Constants {
 	/**
 	 *
 	 */
+	public const LINE_ITEM_RECORDED = "_sort-line_item_recorded";
+
+	/**
+	 *
+	 */
+	public const SORT_FILTER_CAN_RECORD_LINE_ITEM_SALES = "sort-can_record_line_item_sales";
+
+	/**
+	 *
+	 */
 	public const SALES_PERIODS = [
 		1,
 		7,

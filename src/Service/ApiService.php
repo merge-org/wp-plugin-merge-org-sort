@@ -36,7 +36,7 @@ final class ApiService {
 
 	/**
 	 * @param int $productId
-	 * @return array
+	 * @return array<string, int>
 	 */
 	public function getSales(int $productId): array {
 		return $this->wpDataApiService->getPostMeta($productId, Constants::SALES_FIELD) ?: [];
@@ -44,7 +44,7 @@ final class ApiService {
 
 	/**
 	 * @param int $productId
-	 * @param array $sales
+	 * @param array<string, int> $sales
 	 * @param int $previousOrder
 	 * @param bool $excludeFromOrder
 	 * @return Product
@@ -68,7 +68,7 @@ final class ApiService {
 	}
 
 	/**
-	 * @param array $sales
+	 * @param array<string, int> $sales
 	 * @param int $period
 	 * @return int
 	 */
@@ -83,13 +83,8 @@ final class ApiService {
 				break;
 			}
 
-			// TODO DECIDE IF IS TO KEEP
-			if($date === $today) {
-				//	continue;
-			}
-
 			if($date < $furthestDateInPast) {
-				break;
+				continue;
 			}
 
 			$singlePeriodSales += $dailyTotalSale;
@@ -115,21 +110,27 @@ final class ApiService {
 	}
 
 	/**
+	 * @param int $lineItemId
 	 * @param int $productId
 	 * @param int $quantity
 	 * @return void
 	 */
-	public function incrementAndSave(int $productId, int $quantity): void {
+	public function incrementSalesAndSave(int $lineItemId, int $productId, int $quantity = 1): void {
+		if($this->wpDataApiService->getLineItemMeta($lineItemId, Constants::LINE_ITEM_RECORDED) === "yes") {
+			return;
+		}
+
 		$sales = $this->getSales($productId);
 		$incrementedSales = $this->incrementSales($sales, $quantity);
 		$this->wpDataApiService->updatePostMeta($productId, Constants::SALES_FIELD, $incrementedSales);
+		$this->wpDataApiService->updateLineItemMeta($lineItemId, Constants::LINE_ITEM_RECORDED, "yes");
 	}
 
 	/**
-	 * @param array $sales
+	 * @param array<string, int> $sales
 	 * @param int $salesQuantity
 	 * @param string $date
-	 * @return array
+	 * @return array<string, int>
 	 */
 	public function incrementSales(array $sales, int $salesQuantity = 1, string $date = "TODAY"): array {
 		$today = date("Y-m-d");
@@ -157,7 +158,7 @@ final class ApiService {
 
 		$unset = [];
 		foreach($sales as $date => $sale) {
-			if($date < $maxDaysAgo) {
+			if(!DateTime::createFromFormat("Y-m-d", $date) || $date < $maxDaysAgo) {
 				$unset[] = $date;
 			}
 		}

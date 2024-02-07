@@ -97,7 +97,7 @@ final class Product implements JsonSerializable {
 	}
 
 	/**
-	 * @return array
+	 * @return array<string, bool|int>
 	 */
 	public function jsonSerialize(): array {
 		return [
