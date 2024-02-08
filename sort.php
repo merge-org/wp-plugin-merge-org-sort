@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Description: Merge Sort - Sales Order Ranking Tool
  * Author: Merge
  * Author URI: https://github.com/merge-org
- * Version: 1.0.4
+ * Version: 1.0.5
  * Text Domain: merge_sort
  * Domain Path: /languages
  * Requires PHP: 7.4
@@ -21,6 +21,7 @@ namespace MergeOrg\Sort;
 
 use MergeOrg\Sort\Service\ApiService;
 use MergeOrg\Sort\Hooks\ThankYouHook;
+use MergeOrg\Sort\Hooks\AdminPageHook;
 use MergeOrg\Sort\Service\WpDataApiService;
 use MergeOrg\Sort\Service\WpDataApiServiceInterface;
 
@@ -82,6 +83,10 @@ final class Sort {
 			($this->get(ThankYouHook::class))($orderId);
 		});
 
+		add_action("admin_menu", function(): void {
+			($this->get(AdminPageHook::class))();
+		});
+
 		self::$init = TRUE;
 	}
 
@@ -93,10 +98,12 @@ final class Sort {
 		if(!self::$containerInit) {
 			$wpDataApiService = new WpDataApiService();
 			$apiService = new ApiService($wpDataApiService);
-			$thankYouHook = new ThankYouHook($apiService);
+			$thankYouHook = new ThankYouHook($apiService, $wpDataApiService);
+			$adminPageHook = new AdminPageHook($apiService);
 			$this->container[WpDataApiServiceInterface::class] = $wpDataApiService;
 			$this->container[ApiService::class] = $apiService;
 			$this->container[ThankYouHook::class] = $thankYouHook;
+			$this->container[AdminPageHook::class] = $adminPageHook;
 
 			self::$containerInit = TRUE;
 		}
@@ -105,5 +112,4 @@ final class Sort {
 	}
 }
 
-new Sort();
 new Sort();

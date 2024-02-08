@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace MergeOrg\Sort\Service;
 
 use DateTime;
+use WC_Order;
+use WC_Order_Refund;
 use MergeOrg\Sort\Constants;
 use MergeOrg\Sort\Data\Product;
 
@@ -13,6 +15,11 @@ final class ApiService {
 	 * @var WpDataApiServiceInterface
 	 */
 	private WpDataApiServiceInterface $wpDataApiService;
+
+	/**
+	 * @var array<string, string>
+	 */
+	private array $options;
 
 	/**
 	 * @param WpDataApiServiceInterface $wpDataApiService
@@ -170,5 +177,47 @@ final class ApiService {
 		krsort($sales, SORT_STRING);
 
 		return $sales;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function getOptionDebug(): bool {
+		return $this->getOption(Constants::OPTIONS_DEBUG_FIELD) === "yes";
+	}
+
+	/**
+	 * @param string $key
+	 * @return mixed
+	 */
+	private function getOption(string $key) {
+		if(!($this->options ?? FALSE)) {
+			$this->options = $this->wpDataApiService->getOption(Constants::OPTIONS_FIELD);
+		}
+
+		return $this->options[$key] ?? NULL;
+	}
+
+	/**
+	 * @param int $orderId
+	 * @return bool|WC_Order|WC_Order_Refund
+	 */
+	public function getOrder(int $orderId) {
+		return $this->wpDataApiService->getOrder($orderId);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function getOptionUseLineItemQuantity(): bool {
+		return $this->getOption(Constants::OPTIONS_USE_LINE_ITEM_QUANTITY_FIELD) === "yes";
+	}
+
+	/**
+	 * @param array<string, string> $options
+	 * @return void
+	 */
+	public function updateOptions(array $options): void {
+		$this->wpDataApiService->updateOption(Constants::OPTIONS_FIELD, $options);
 	}
 }

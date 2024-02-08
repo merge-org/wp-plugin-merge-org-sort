@@ -45,4 +45,18 @@ interface WpDataApiServiceInterface {
 	 * @return bool|WC_Order|WC_Order_Refund
 	 */
 	public function getOrder(int $orderId);
+
+	/**
+	 * @param string $option
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	public function getOption(string $option, $default = NULL);
+
+	/**
+	 * @param string $option
+	 * @param mixed $value
+	 * @return bool
+	 */
+	public function updateOption(string $option, $value): bool;
 }

@@ -70,4 +70,22 @@ final class WpDataApiService implements WpDataApiServiceInterface {
 
 		return wc_get_order($orderId);
 	}
+
+	/**
+	 * @param string $option
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	public function getOption(string $option, $default = NULL) {
+		return get_option($option, $default);
+	}
+
+	/**
+	 * @param string $option
+	 * @param mixed $value
+	 * @return bool
+	 */
+	public function updateOption(string $option, $value): bool {
+		return update_option($option, $value, FALSE);
+	}
 }

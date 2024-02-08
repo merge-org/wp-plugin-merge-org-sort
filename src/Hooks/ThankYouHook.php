@@ -5,7 +5,6 @@ namespace MergeOrg\Sort\Hooks;
 
 use MergeOrg\Sort\Constants;
 use MergeOrg\Sort\Service\ApiService;
-use MergeOrg\Sort\Service\WpDataApiService;
 
 final class ThankYouHook {
 
@@ -15,17 +14,10 @@ final class ThankYouHook {
 	private ApiService $apiService;
 
 	/**
-	 * @var WpDataApiService
-	 */
-	private WpDataApiService $wpDataApiService;
-
-	/**
 	 * @param ApiService $apiService
-	 * @param WpDataApiService $wpDataApiService
 	 */
-	public function __construct(ApiService $apiService, WpDataApiService $wpDataApiService) {
+	public function __construct(ApiService $apiService) {
 		$this->apiService = $apiService;
-		$this->wpDataApiService = $wpDataApiService;
 	}
 
 	/**
@@ -33,7 +25,7 @@ final class ThankYouHook {
 	 * @return void
 	 */
 	public function __invoke(int $orderId): void {
-		$order = $this->wpDataApiService->getOrder($orderId);
+		$order = $this->apiService->getOrder($orderId);
 
 		if(!$order) {
 			return;
@@ -43,8 +35,7 @@ final class ThankYouHook {
 			$data = $item->get_data();
 			$productId = (int) ($data["product_id"] ?? 0);
 			$lineItemId = (int) ($data["id"] ?? 0);
-			// TODO CHECK IF QUANTITY PARSING WOULD BE CONFIGURABLE OR NOT
-			$quantity = (int) $data["quantity"];
+			$quantity = $this->apiService->getOptionUseLineItemQuantity() ? (int) $data["quantity"] : 1;
 
 			if(!$productId || !$lineItemId) {
 				continue;

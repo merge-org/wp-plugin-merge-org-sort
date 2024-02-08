@@ -13,27 +13,47 @@ final class Constants {
 	/**
 	 *
 	 */
-	public const SALES_FIELD = "sort-sales";
+	public const ADMIN_MAIN_PAGE_MENU_SLUG = "merge-org-sort-admin_main_page";
 
 	/**
 	 *
 	 */
-	public const PREVIOUS_ORDER_FIELD = "sort-previous_order";
+	public const OPTIONS_FIELD = "merge-org-sort-options";
 
 	/**
 	 *
 	 */
-	public const EXCLUDE_FROM_SORTING_FIELD = "sort-exclude_from_sorting";
+	public const OPTIONS_DEBUG_FIELD = "debug";
 
 	/**
 	 *
 	 */
-	public const LINE_ITEM_RECORDED = "_sort-line_item_recorded";
+	public const OPTIONS_USE_LINE_ITEM_QUANTITY_FIELD = "use_line_item_quantity";
 
 	/**
 	 *
 	 */
-	public const SORT_FILTER_CAN_RECORD_LINE_ITEM_SALES = "sort-can_record_line_item_sales";
+	public const SALES_FIELD = "merge-org-sort-sales";
+
+	/**
+	 *
+	 */
+	public const PREVIOUS_ORDER_FIELD = "merge-org-sort-previous_order";
+
+	/**
+	 *
+	 */
+	public const EXCLUDE_FROM_SORTING_FIELD = "merge-org-sort-exclude_from_sorting";
+
+	/**
+	 *
+	 */
+	public const LINE_ITEM_RECORDED = "_merge-org-sort-line_item_recorded";
+
+	/**
+	 *
+	 */
+	public const SORT_FILTER_CAN_RECORD_LINE_ITEM_SALES = "merge-org-sort-can_record_line_item_sales";
 
 	/**
 	 *
