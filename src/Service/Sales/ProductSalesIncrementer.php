@@ -6,7 +6,7 @@ namespace MergeOrg\Sort\Service\Sales;
 use DateTime;
 use MergeOrg\Sort\Constants;
 
-final class ProductSalesIncrementer {
+final class ProductSalesIncrementer implements ProductSalesIncrementerInterface {
 
 	/**
 	 * @param array<string, array<int>> $sales
@@ -15,40 +15,43 @@ final class ProductSalesIncrementer {
 	 * @return array<string, array<int>>
 	 */
 	public function increment(array $sales, int $quantity, string $date = "TODAY"): array {
+		$date === "TODAY" &&
+		$date = date("Y-m-d");
+
+		if(!$this->dateIsIrrelevant($date)) {
+			$sales[$date] =
+				$sales[$date] ?? [
+				0,
+				0,
+			];
+
+			$sales[$date][0] += 1;
+			$sales[$date][1] += $quantity;
+		}
+
+		return $this->normalizeSales($sales);
+	}
+
+	/**
+	 * @param string $date
+	 * @return bool
+	 */
+	public function dateIsIrrelevant(string $date): bool {
 		$today = date("Y-m-d");
-		if($date === "TODAY") {
-			$date = date("Y-m-d");
-		}
-
-		$testDate = DateTime::createFromFormat("Y-m-d", $date);
-		if(!($testDate && $testDate->format("Y-m-d") === $date)) {
-			return $sales;
-		}
-
-		if($date > $today) {
-			return $sales;
-		}
-
 		$maxDaysAccepted = max(...array_keys(Constants::SALES_PERIODS_IN_DAYS));
 		$maxDaysAgo = date("Y-m-d", strtotime("-$maxDaysAccepted days"));
-		if($date < $maxDaysAgo) {
-			return $sales;
-		}
 
-		$sales[$date] =
-			$sales[$date] ?? [
-			0,
-			0,
-		];
+		return !DateTime::createFromFormat("Y-m-d", $date) || $date < $maxDaysAgo || $date > $today;
+	}
 
-		$sales[$date][0] += 1;
-		$sales[$date][1] += $quantity;
-
+	/**
+	 * @param array<string, array<int>> $sales
+	 * @return array<string, array<int>>
+	 */
+	public function normalizeSales(array $sales): array {
 		$unset = [];
 		foreach($sales as $date => $sale) {
-			if(!DateTime::createFromFormat("Y-m-d", $date) || $date < $maxDaysAgo) {
-				$unset[] = $date;
-			}
+			$this->dateIsIrrelevant($date) && ($unset[] = $date);
 		}
 
 		foreach($unset as $date) {

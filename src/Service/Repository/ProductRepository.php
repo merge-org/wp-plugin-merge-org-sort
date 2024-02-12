@@ -7,6 +7,7 @@ use MergeOrg\Sort\Constants;
 use MergeOrg\Sort\Data\Native\Product;
 use MergeOrg\Sort\Data\Native\SalesPeriod;
 use MergeOrg\Sort\Wordpress\Api\ApiInterface;
+use MergeOrg\Sort\Service\Sales\ProductSalesIncrementerInterface;
 use MergeOrg\Sort\Exception\InvalidSalesPeriodInProductConstructionException;
 use MergeOrg\Sort\Exception\InvalidPeriodInDaysInSalesPeriodCreationException;
 
@@ -18,10 +19,17 @@ final class ProductRepository {
 	private ApiInterface $wordpressApi;
 
 	/**
-	 * @param ApiInterface $wordpressApi
+	 * @var ProductSalesIncrementerInterface
 	 */
-	public function __construct(ApiInterface $wordpressApi) {
+	private ProductSalesIncrementerInterface $productSalesIncrementer;
+
+	/**
+	 * @param ApiInterface $wordpressApi
+	 * @param ProductSalesIncrementerInterface $productSalesIncrementer
+	 */
+	public function __construct(ApiInterface $wordpressApi, ProductSalesIncrementerInterface $productSalesIncrementer) {
 		$this->wordpressApi = $wordpressApi;
+		$this->productSalesIncrementer = $productSalesIncrementer;
 	}
 
 	/**
@@ -87,6 +95,18 @@ final class ProductRepository {
 		}
 
 		return new SalesPeriod($periodInDays, $salesForPeriod, $quantitySalesForPeriod);
+	}
+
+	/**
+	 * @param int $productId
+	 * @param int $quantity
+	 * @param string $date
+	 * @return void
+	 */
+	public function incrementProductSales(int $productId, int $quantity, string $date = "TODAY"): void {
+		$product = $this->wordpressApi->getProduct($productId);
+		$incrementedSales = $this->productSalesIncrementer->increment($product->getSales(), $quantity, $date);
+		$this->wordpressApi->setProductSales($productId, $incrementedSales);
 	}
 
 }

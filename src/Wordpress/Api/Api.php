@@ -27,16 +27,6 @@ final class Api implements ApiInterface {
 	}
 
 	/**
-	 * @param int $postId
-	 * @param string $metaKey
-	 * @param mixed $metaValue
-	 * @return bool
-	 */
-	public function updatePostMeta(int $postId, string $metaKey, $metaValue): bool {
-		return (bool) update_post_meta($postId, $metaKey, $metaValue);
-	}
-
-	/**
 	 * @param int $lineItemId
 	 * @param string $key
 	 * @param $default
@@ -173,5 +163,32 @@ final class Api implements ApiInterface {
 	 */
 	public function getProductPreviousOrder(int $productId): int {
 		return (int) $this->getPostMeta($productId, Constants::META_FIELD_PREVIOUS_ORDER, "-1");
+	}
+
+	/**
+	 * @param int $productId
+	 * @param array<string, array<int>> $sales
+	 * @return bool
+	 */
+	public function setProductSales(int $productId, array $sales): bool {
+		$sales_ = [];
+		foreach($sales as $date => $dateSales) {
+			$sales_[$date] = [
+				$this->integerEncoder->encode($dateSales[0]),
+				$this->integerEncoder->encode($dateSales[1]),
+			];
+		}
+
+		return $this->updatePostMeta($productId, Constants::META_FIELD_SALES, $sales_);
+	}
+
+	/**
+	 * @param int $postId
+	 * @param string $metaKey
+	 * @param mixed $metaValue
+	 * @return bool
+	 */
+	public function updatePostMeta(int $postId, string $metaKey, $metaValue): bool {
+		return (bool) update_post_meta($postId, $metaKey, $metaValue);
 	}
 }

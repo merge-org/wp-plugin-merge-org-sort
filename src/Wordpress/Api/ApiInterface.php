@@ -65,4 +65,17 @@ interface ApiInterface {
 	 * @return bool
 	 */
 	public function updateOption(string $option, $value): bool;
+
+	/**
+	 * @param int $productId
+	 * @return array<string, array<int>>
+	 */
+	public function getProductSales(int $productId): array;
+
+	/**
+	 * @param int $productId
+	 * @param array<string, array<int>> $sales
+	 * @return bool
+	 */
+	public function setProductSales(int $productId, array $sales): bool;
 }
