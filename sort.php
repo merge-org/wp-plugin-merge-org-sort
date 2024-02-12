@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Description: Merge Sort - Sales Order Ranking Tool
  * Author: Merge
  * Author URI: https://github.com/merge-org
- * Version: 1.0.7
+ * Version: 1.0.8
  * Text Domain: merge-org-sort
  * Domain Path: /languages
  * Requires PHP: 7.4

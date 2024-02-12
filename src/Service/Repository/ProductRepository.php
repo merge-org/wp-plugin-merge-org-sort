@@ -88,4 +88,5 @@ final class ProductRepository {
 
 		return new SalesPeriod($periodInDays, $salesForPeriod, $quantitySalesForPeriod);
 	}
+
 }
