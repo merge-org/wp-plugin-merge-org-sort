@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace MergeOrg\Sort\Service;
+namespace MergeOrg\Sort\Wordpress\Api;
 
-use WC_Order;
-use WC_Order_Refund;
+use MergeOrg\Sort\Data\Wordpress\Order;
+use MergeOrg\Sort\Data\Wordpress\Product;
 
-interface WpDataApiServiceInterface {
+interface ApiInterface {
 
 	/**
 	 * @param int $postId
@@ -25,6 +25,12 @@ interface WpDataApiServiceInterface {
 	public function updatePostMeta(int $postId, string $metaKey, $metaValue): bool;
 
 	/**
+	 * @param int $orderId
+	 * @return ?Order
+	 */
+	public function getOrder(int $orderId): ?Order;
+
+	/**
 	 * @param int $lineItemId
 	 * @param string $key
 	 * @param mixed $default
@@ -41,10 +47,10 @@ interface WpDataApiServiceInterface {
 	public function updateLineItemMeta(int $lineItemId, string $metaKey, $metaValue): bool;
 
 	/**
-	 * @param int $orderId
-	 * @return bool|WC_Order|WC_Order_Refund
+	 * @param int $productId
+	 * @return ?Product
 	 */
-	public function getOrder(int $orderId);
+	public function getProduct(int $productId): ?Product;
 
 	/**
 	 * @param string $option

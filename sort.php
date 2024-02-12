@@ -7,8 +7,8 @@ declare(strict_types=1);
  * Description: Merge Sort - Sales Order Ranking Tool
  * Author: Merge
  * Author URI: https://github.com/merge-org
- * Version: 1.0.5
- * Text Domain: merge_sort
+ * Version: 1.0.6
+ * Text Domain: merge-org-sort
  * Domain Path: /languages
  * Requires PHP: 7.4
  * Requires at least: 6.0
@@ -19,11 +19,7 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort;
 
-use MergeOrg\Sort\Service\ApiService;
-use MergeOrg\Sort\Hooks\ThankYouHook;
-use MergeOrg\Sort\Hooks\AdminPageHook;
-use MergeOrg\Sort\Service\WpDataApiService;
-use MergeOrg\Sort\Service\WpDataApiServiceInterface;
+use MergeOrg\Sort\Wordpress\Service\ActionsRegistrar;
 
 require_once __DIR__ . "/vendor/autoload.php";
 
@@ -64,14 +60,6 @@ final class Sort {
 	 * @return bool
 	 */
 	private function validate(): bool {
-		// TODO VALIDATE
-		//		add_action("admin_notices", function() {
-		//			echo "
-		//				<div class=\"notice notice-error\">
-		//            		<p></p>
-		//        		</div>";
-		//		});
-
 		return TRUE;
 	}
 
@@ -79,13 +67,11 @@ final class Sort {
 	 * @return void
 	 */
 	private function init(): void {
-		add_action("woocommerce_thankyou", function(int $orderId): void {
-			($this->get(ThankYouHook::class))($orderId);
-		});
-
-		add_action("admin_menu", function(): void {
-			($this->get(AdminPageHook::class))();
-		});
+		/**
+		 * We don't get the `ActionsRegistrar` from the container, because that would initiated all other instances.
+		 * While here we just want to register (add) the required actions
+		 */
+		(new ActionsRegistrar())->run();
 
 		self::$init = TRUE;
 	}
@@ -96,15 +82,6 @@ final class Sort {
 	 */
 	private function get(string $key) {
 		if(!self::$containerInit) {
-			$wpDataApiService = new WpDataApiService();
-			$apiService = new ApiService($wpDataApiService);
-			$thankYouHook = new ThankYouHook($apiService, $wpDataApiService);
-			$adminPageHook = new AdminPageHook($apiService);
-			$this->container[WpDataApiServiceInterface::class] = $wpDataApiService;
-			$this->container[ApiService::class] = $apiService;
-			$this->container[ThankYouHook::class] = $thankYouHook;
-			$this->container[AdminPageHook::class] = $adminPageHook;
-
 			self::$containerInit = TRUE;
 		}
 

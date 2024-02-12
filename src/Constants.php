@@ -3,69 +3,48 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort;
 
-/**
- * Class Constants
- *
- * @package MergeOrg\Sort
- */
 final class Constants {
 
 	/**
 	 *
 	 */
-	public const ADMIN_MAIN_PAGE_MENU_SLUG = "merge-org-sort-admin_main_page";
+	public const PLUGIN_NAME = "merge-org-sort";
 
 	/**
 	 *
 	 */
-	public const OPTIONS_FIELD = "merge-org-sort-options";
+	public const POST_TYPE_PRODUCT = "product";
 
 	/**
 	 *
 	 */
-	public const OPTIONS_DEBUG_FIELD = "debug";
+	public const POST_TYPE_PRODUCT_VARIATION = "product_variation";
 
 	/**
 	 *
 	 */
-	public const OPTIONS_USE_LINE_ITEM_QUANTITY_FIELD = "use_line_item_quantity";
+	public const META_FIELD_SALES = "merge-org-sort-sales";
 
 	/**
 	 *
 	 */
-	public const SALES_FIELD = "merge-org-sort-sales";
+	public const META_FIELD_EXCLUDE_FROM_SORTING = "merge-org-sort-exclude_from_sorting";
 
 	/**
 	 *
 	 */
-	public const PREVIOUS_ORDER_FIELD = "merge-org-sort-previous_order";
+	public const META_FIELD_PREVIOUS_ORDER = "merge-org-sort-previous_order";
 
 	/**
 	 *
 	 */
-	public const EXCLUDE_FROM_SORTING_FIELD = "merge-org-sort-exclude_from_sorting";
-
-	/**
-	 *
-	 */
-	public const LINE_ITEM_RECORDED = "_merge-org-sort-line_item_recorded";
-
-	/**
-	 *
-	 */
-	public const SORT_FILTER_CAN_RECORD_LINE_ITEM_SALES = "merge-org-sort-can_record_line_item_sales";
-
-	/**
-	 *
-	 */
-	public const SALES_PERIODS = [
-		1,
-		7,
-		15,
-		30,
-		60,
-		90,
-		180,
-		365,
+	public const SALES_PERIODS_IN_DAYS = [
+		1 => "daily",
+		7 => "weekly",
+		15 => "semiMonthly",
+		30 => "monthly",
+		90 => "quarterly",
+		180 => "semiAnnually",
+		365 => "yearly",
 	];
 }
