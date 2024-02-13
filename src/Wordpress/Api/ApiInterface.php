@@ -78,4 +78,16 @@ interface ApiInterface {
 	 * @return bool
 	 */
 	public function setProductSales(int $productId, array $sales): bool;
+
+	/**
+	 * @param int $orderId
+	 * @return bool
+	 */
+	public function getOrderRecorded(int $orderId): bool;
+
+	/**
+	 * @param int $orderId
+	 * @return bool
+	 */
+	public function setOrderRecorded(int $orderId): bool;
 }

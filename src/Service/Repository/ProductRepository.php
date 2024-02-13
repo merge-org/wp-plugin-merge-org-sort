@@ -14,6 +14,11 @@ use MergeOrg\Sort\Exception\InvalidPeriodInDaysInSalesPeriodCreationException;
 final class ProductRepository {
 
 	/**
+	 * @var Product[]
+	 */
+	private array $cache = [];
+
+	/**
 	 * @var ApiInterface
 	 */
 	private ApiInterface $wordpressApi;
@@ -34,16 +39,21 @@ final class ProductRepository {
 
 	/**
 	 * @param int $productId
+	 * @param bool $ignoreCache
 	 * @return Product|null
-	 * @throws InvalidSalesPeriodInProductConstructionException
 	 * @throws InvalidPeriodInDaysInSalesPeriodCreationException
+	 * @throws InvalidSalesPeriodInProductConstructionException
 	 */
-	public function get(int $productId): ?Product {
+	public function get(int $productId, bool $ignoreCache = FALSE): ?Product {
+		if(!$ignoreCache && ($product = ($this->cache[$productId] ?? FALSE))) {
+			return $product;
+		}
+
 		if(!$product = $this->wordpressApi->getProduct($productId)) {
 			return NULL;
 		}
 
-		return new Product($productId,
+		return $this->cache[$productId] = new Product($productId,
 			$this->hydrateSalesToSalesPeriods($product->getSales()),
 			$product->getType(),
 			$product->getExcludeFromSorting(),

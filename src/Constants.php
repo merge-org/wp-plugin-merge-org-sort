@@ -23,17 +23,22 @@ final class Constants {
 	/**
 	 *
 	 */
-	public const META_FIELD_SALES = "merge-org-sort-sales";
+	public const META_FIELD_PRODUCT_SALES = "merge-org-sort-sales";
 
 	/**
 	 *
 	 */
-	public const META_FIELD_EXCLUDE_FROM_SORTING = "merge-org-sort-exclude_from_sorting";
+	public const META_FIELD_PRODUCT_EXCLUDE_FROM_SORTING = "merge-org-sort-exclude_from_sorting";
 
 	/**
 	 *
 	 */
-	public const META_FIELD_PREVIOUS_ORDER = "merge-org-sort-previous_order";
+	public const META_FIELD_PRODUCT_PREVIOUS_ORDER = "merge-org-sort-previous_order";
+
+	/**
+	 *
+	 */
+	public const META_FIELD_ORDER_RECORDED = "merge-org-sort-recorded";
 
 	/**
 	 *

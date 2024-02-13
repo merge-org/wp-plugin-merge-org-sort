@@ -114,4 +114,18 @@ final class Product implements JsonSerializable {
 	public function getPreviousMenuOrder(): int {
 		return $this->previousMenuOrder;
 	}
+
+	/**
+	 * @param int $periodInDays
+	 * @return SalesPeriod|null
+	 */
+	public function getSalePeriodByPeriodInDays(int $periodInDays): ?SalesPeriod {
+		foreach($this->getSalesPeriods() as $salesPeriod) {
+			if($salesPeriod->getPeriodInDays() === $periodInDays) {
+				return $salesPeriod;
+			}
+		}
+
+		return NULL;
+	}
 }

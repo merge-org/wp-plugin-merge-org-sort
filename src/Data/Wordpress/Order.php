@@ -18,11 +18,17 @@ final class Order {
 	private array $lineItems;
 
 	/**
+	 * @var bool
+	 */
+	private bool $recorded;
+
+	/**
 	 * @param int $id
 	 * @param LineItem[] $lineItems
+	 * @param bool $recorded
 	 * @throws InvalidLineItemInOrderCreationException
 	 */
-	public function __construct(int $id, array $lineItems = []) {
+	public function __construct(int $id, array $lineItems = [], bool $recorded = FALSE) {
 		foreach($lineItems as $lineItem) {
 			if(get_class($lineItem) !== LineItem::class) {
 				throw new InvalidLineItemInOrderCreationException();
@@ -31,8 +37,12 @@ final class Order {
 
 		$this->id = $id;
 		$this->lineItems = $lineItems;
+		$this->recorded = $recorded;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function getId(): int {
 		return $this->id;
 	}
@@ -42,5 +52,12 @@ final class Order {
 	 */
 	public function getLineItems(): array {
 		return $this->lineItems;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function getRecorded(): bool {
+		return $this->recorded;
 	}
 }

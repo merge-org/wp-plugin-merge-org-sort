@@ -8,23 +8,9 @@ use MergeOrg\Sort\Constants;
 use MergeOrg\Sort\Data\Wordpress\Order;
 use MergeOrg\Sort\Data\Wordpress\Product;
 use MergeOrg\Sort\Data\Wordpress\LineItem;
-use MergeOrg\Sort\Service\IntegerEncoder\IntegerEncoderInterface;
-use MergeOrg\Sort\Exception\InvalidInputForIntegerEncoderException;
 use MergeOrg\Sort\Exception\InvalidLineItemInOrderCreationException;
 
 final class Api implements ApiInterface {
-
-	/**
-	 * @var IntegerEncoderInterface
-	 */
-	private IntegerEncoderInterface $integerEncoder;
-
-	/**
-	 * @param IntegerEncoderInterface $integerEncoder
-	 */
-	public function __construct(IntegerEncoderInterface $integerEncoder) {
-		$this->integerEncoder = $integerEncoder;
-	}
 
 	/**
 	 * @param int $lineItemId
@@ -78,7 +64,25 @@ final class Api implements ApiInterface {
 				$orderItemData["variation_id"] ?? 0, $orderItemData["quantity"]);
 		}
 
-		return new Order($orderId, $lineItems);
+		return new Order($orderId, $lineItems, $this->getOrderRecorded($orderId));
+	}
+
+	/**
+	 * @param int $orderId
+	 * @return bool
+	 */
+	public function getOrderRecorded(int $orderId): bool {
+		return $this->getPostMeta($orderId, Constants::META_FIELD_ORDER_RECORDED, "no") === "yes";
+	}
+
+	/**
+	 * @param int $postId
+	 * @param string $key
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	public function getPostMeta(int $postId, string $key, $default = NULL) {
+		return get_post_meta($postId, $key, TRUE) ?: $default;
 	}
 
 	/**
@@ -102,7 +106,6 @@ final class Api implements ApiInterface {
 	/**
 	 * @param int $productId
 	 * @return ?Product
-	 * @throws InvalidInputForIntegerEncoderException
 	 */
 	public function getProduct(int $productId): ?Product {
 		if(!function_exists("wc_get_product")) {
@@ -124,29 +127,9 @@ final class Api implements ApiInterface {
 	/**
 	 * @param int $productId
 	 * @return array<string, array<int>>
-	 * @throws InvalidInputForIntegerEncoderException
 	 */
 	public function getProductSales(int $productId): array {
-		$sales = $this->getPostMeta($productId, Constants::META_FIELD_SALES, []);
-		$sales_ = [];
-		foreach($sales as $date => $dateSales) {
-			$sales_[$date] = [
-				$this->integerEncoder->decode($dateSales[0]),
-				$this->integerEncoder->decode($dateSales[1]),
-			];
-		}
-
-		return $sales_;
-	}
-
-	/**
-	 * @param int $postId
-	 * @param string $key
-	 * @param mixed $default
-	 * @return mixed
-	 */
-	public function getPostMeta(int $postId, string $key, $default = NULL) {
-		return get_post_meta($postId, $key, TRUE) ?: $default;
+		return $this->getPostMeta($productId, Constants::META_FIELD_PRODUCT_SALES, []);
 	}
 
 	/**
@@ -154,7 +137,7 @@ final class Api implements ApiInterface {
 	 * @return bool
 	 */
 	public function getProductIsExcludedFromSorting(int $productId): bool {
-		return $this->getPostMeta($productId, Constants::META_FIELD_EXCLUDE_FROM_SORTING, "no") === "yes";
+		return $this->getPostMeta($productId, Constants::META_FIELD_PRODUCT_EXCLUDE_FROM_SORTING, "no") === "yes";
 	}
 
 	/**
@@ -162,24 +145,15 @@ final class Api implements ApiInterface {
 	 * @return int
 	 */
 	public function getProductPreviousOrder(int $productId): int {
-		return (int) $this->getPostMeta($productId, Constants::META_FIELD_PREVIOUS_ORDER, "-1");
+		return (int) $this->getPostMeta($productId, Constants::META_FIELD_PRODUCT_PREVIOUS_ORDER, "-1");
 	}
 
 	/**
-	 * @param int $productId
-	 * @param array<string, array<int>> $sales
+	 * @param int $orderId
 	 * @return bool
 	 */
-	public function setProductSales(int $productId, array $sales): bool {
-		$sales_ = [];
-		foreach($sales as $date => $dateSales) {
-			$sales_[$date] = [
-				$this->integerEncoder->encode($dateSales[0]),
-				$this->integerEncoder->encode($dateSales[1]),
-			];
-		}
-
-		return $this->updatePostMeta($productId, Constants::META_FIELD_SALES, $sales_);
+	public function setOrderRecorded(int $orderId): bool {
+		return $this->updatePostMeta($orderId, Constants::META_FIELD_ORDER_RECORDED, "yes");
 	}
 
 	/**
@@ -190,5 +164,14 @@ final class Api implements ApiInterface {
 	 */
 	public function updatePostMeta(int $postId, string $metaKey, $metaValue): bool {
 		return (bool) update_post_meta($postId, $metaKey, $metaValue);
+	}
+
+	/**
+	 * @param int $productId
+	 * @param array<string, array<int>> $sales
+	 * @return bool
+	 */
+	public function setProductSales(int $productId, array $sales): bool {
+		return $this->updatePostMeta($productId, Constants::META_FIELD_PRODUCT_SALES, $sales);
 	}
 }
