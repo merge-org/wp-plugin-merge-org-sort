@@ -7,7 +7,7 @@ use MergeOrg\Sort\Constants;
 use MergeOrg\Sort\Data\Native\Product;
 use MergeOrg\Sort\Data\Native\SalesPeriod;
 use MergeOrg\Sort\Wordpress\Api\ApiInterface;
-use MergeOrg\Sort\Service\Sales\ProductSalesIncrementerInterface;
+use MergeOrg\Sort\Service\Sales\ArrayProductSalesIncrementer;
 use MergeOrg\Sort\Exception\InvalidSalesPeriodInProductConstructionException;
 use MergeOrg\Sort\Exception\InvalidPeriodInDaysInSalesPeriodCreationException;
 
@@ -24,17 +24,17 @@ final class ProductRepository {
 	private ApiInterface $wordpressApi;
 
 	/**
-	 * @var ProductSalesIncrementerInterface
+	 * @var ArrayProductSalesIncrementer
 	 */
-	private ProductSalesIncrementerInterface $productSalesIncrementer;
+	private ArrayProductSalesIncrementer $arrayProductSalesIncrementer;
 
 	/**
 	 * @param ApiInterface $wordpressApi
-	 * @param ProductSalesIncrementerInterface $productSalesIncrementer
+	 * @param ArrayProductSalesIncrementer $arrayProductSalesIncrementer
 	 */
-	public function __construct(ApiInterface $wordpressApi, ProductSalesIncrementerInterface $productSalesIncrementer) {
+	public function __construct(ApiInterface $wordpressApi, ArrayProductSalesIncrementer $arrayProductSalesIncrementer) {
 		$this->wordpressApi = $wordpressApi;
-		$this->productSalesIncrementer = $productSalesIncrementer;
+		$this->arrayProductSalesIncrementer = $arrayProductSalesIncrementer;
 	}
 
 	/**
@@ -54,7 +54,7 @@ final class ProductRepository {
 		}
 
 		return $this->cache[$productId] = new Product($productId,
-			$this->hydrateSalesToSalesPeriods($product->getSales()),
+			$this->hydrateArrayProductSalesToSalesPeriods($product->getSales()),
 			$product->getType(),
 			$product->getExcludeFromSorting(),
 			$product->getPreviousOrder());
@@ -65,10 +65,10 @@ final class ProductRepository {
 	 * @return SalesPeriod[]
 	 * @throws InvalidPeriodInDaysInSalesPeriodCreationException
 	 */
-	public function hydrateSalesToSalesPeriods(array $sales): array {
+	public function hydrateArrayProductSalesToSalesPeriods(array $sales): array {
 		$salesPeriods = [];
 		foreach(Constants::SALES_PERIODS_IN_DAYS as $periodInDays => $name) {
-			$salesPeriods[] = $this->getSalesPeriodForPeriodInDaysFromSales($sales, $periodInDays);
+			$salesPeriods[] = $this->getSalesPeriodForPeriodInDaysFromArrayProductSales($sales, $periodInDays);
 		}
 
 		return $salesPeriods;
@@ -80,7 +80,7 @@ final class ProductRepository {
 	 * @return SalesPeriod
 	 * @throws InvalidPeriodInDaysInSalesPeriodCreationException
 	 */
-	public function getSalesPeriodForPeriodInDaysFromSales(array $sales, int $periodInDays): SalesPeriod {
+	public function getSalesPeriodForPeriodInDaysFromArrayProductSales(array $sales, int $periodInDays): SalesPeriod {
 		$today = date("Y-m-d");
 		$furthestDateInPast = date("Y-m-d", strtotime("-$periodInDays days"));
 
@@ -115,7 +115,7 @@ final class ProductRepository {
 	 */
 	public function incrementProductSales(int $productId, int $quantity, string $date = "TODAY"): void {
 		$product = $this->wordpressApi->getProduct($productId);
-		$incrementedSales = $this->productSalesIncrementer->increment($product->getSales(), $quantity, $date);
+		$incrementedSales = $this->arrayProductSalesIncrementer->increment($product->getSales(), $quantity, $date);
 		$this->wordpressApi->setProductSales($productId, $incrementedSales);
 	}
 

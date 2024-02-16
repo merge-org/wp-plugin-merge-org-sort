@@ -6,7 +6,7 @@ namespace MergeOrg\Sort\Service\Sales;
 use DateTime;
 use MergeOrg\Sort\Constants;
 
-final class ProductSalesIncrementer implements ProductSalesIncrementerInterface {
+final class ArrayProductSalesIncrementer {
 
 	/**
 	 * @param array<string, array<int>> $sales
@@ -36,7 +36,7 @@ final class ProductSalesIncrementer implements ProductSalesIncrementerInterface 
 	 * @param string $date
 	 * @return bool
 	 */
-	public function dateIsIrrelevant(string $date): bool {
+	private function dateIsIrrelevant(string $date): bool {
 		$today = date("Y-m-d");
 		$maxDaysAccepted = max(...array_keys(Constants::SALES_PERIODS_IN_DAYS));
 		$maxDaysAgo = date("Y-m-d", strtotime("-$maxDaysAccepted days"));
@@ -48,13 +48,13 @@ final class ProductSalesIncrementer implements ProductSalesIncrementerInterface 
 	 * @param array<string, array<int>> $sales
 	 * @return array<string, array<int>>
 	 */
-	public function normalizeSales(array $sales): array {
-		$unset = [];
+	private function normalizeSales(array $sales): array {
+		$datesToUnset = [];
 		foreach($sales as $date => $sale) {
-			$this->dateIsIrrelevant($date) && ($unset[] = $date);
+			$this->dateIsIrrelevant($date) && ($datesToUnset[] = $date);
 		}
 
-		foreach($unset as $date) {
+		foreach($datesToUnset as $date) {
 			unset($sales[$date]);
 		}
 

@@ -48,7 +48,7 @@ final class Product implements JsonSerializable {
 		bool $excludedFromSorting = FALSE,
 		int $previousMenuOrder = -1) {
 		foreach($salesPeriods as $salesPeriod) {
-			if(get_class($salesPeriod) !== SalesPeriod::class) {
+			if(!is_object($salesPeriod) || get_class($salesPeriod) !== SalesPeriod::class) {
 				throw new InvalidSalesPeriodInProductConstructionException();
 			}
 		}

@@ -52,4 +52,5 @@ final class Constants {
 		180 => "semiAnnually",
 		365 => "yearly",
 	];
+
 }
