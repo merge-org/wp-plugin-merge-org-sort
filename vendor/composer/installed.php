@@ -1,8 +1,8 @@
 <?php return array(
     'root' => array(
         'name' => 'merge-org/sort',
-        'pretty_version' => '1.0.25',
-        'version' => '1.0.25.0',
+        'pretty_version' => '1.0.26',
+        'version' => '1.0.26.0',
         'reference' => null,
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
@@ -11,8 +11,8 @@
     ),
     'versions' => array(
         'merge-org/sort' => array(
-            'pretty_version' => '1.0.25',
-            'version' => '1.0.25.0',
+            'pretty_version' => '1.0.26',
+            'version' => '1.0.26.0',
             'reference' => null,
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',

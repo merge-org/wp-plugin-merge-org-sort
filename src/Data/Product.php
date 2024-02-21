@@ -24,9 +24,9 @@ final class Product extends AbstractProduct {
 	 * @param int $previousMenuOrder
 	 */
 	public function __construct(int $id,
-		array $salesPeriods = [],
-		bool $excludedFromSorting = FALSE,
-		int $previousMenuOrder = -1) {
+		array $salesPeriods,
+		bool $excludedFromSorting,
+		int $previousMenuOrder) {
 		parent::__construct($id, $salesPeriods);
 		$this->excludedFromSorting = $excludedFromSorting;
 		$this->previousMenuOrder = $previousMenuOrder;

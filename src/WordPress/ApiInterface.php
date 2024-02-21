@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort\WordPress;
 
+use MergeOrg\Sort\Data\WordPress\Order;
 use MergeOrg\Sort\Data\WordPress\AbstractProduct;
 
 interface ApiInterface {
@@ -13,7 +14,7 @@ interface ApiInterface {
 	 * @param mixed $default
 	 * @return mixed
 	 */
-	public function getPostMeta(int $postId, string $metaKey, $default);
+	public function getPostMeta(int $postId, string $metaKey, $default = NULL);
 
 	/**
 	 * @param int $productId
@@ -32,4 +33,10 @@ interface ApiInterface {
 	 * @return int
 	 */
 	public function getProductPreviousOrder(int $productId): int;
+
+	/**
+	 * @param int $orderId
+	 * @return Order|null
+	 */
+	public function getOrder(int $orderId): ?Order;
 }

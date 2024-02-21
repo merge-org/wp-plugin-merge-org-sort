@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace MergeOrg\Sort\WordPress;
 
 use MergeOrg\Sort\Service\Namer;
+use MergeOrg\Sort\Data\WordPress\Order;
 use MergeOrg\Sort\Data\WordPress\Product;
+use MergeOrg\Sort\Data\WordPress\LineItem;
 use MergeOrg\Sort\Data\WordPress\AbstractProduct;
 use MergeOrg\Sort\Data\WordPress\ProductVariation;
 use MergeOrg\Sort\Exception\InvalidKeyNameException;
@@ -35,24 +37,24 @@ final class Api implements ApiInterface {
 	 * @throws InvalidKeyNameException
 	 */
 	public function getProduct(int $productId): ?AbstractProduct {
-		if(function_exists("wc_get_product")) {
-			$product = wc_get_product($productId);
-			if(!$product) {
-				return NULL;
-			}
-
-			$sales = $this->getPostMeta($productId, $this->namer->getSalesMetaKeyName(), []);
-			if($product->get_parent_id()) {
-				return new Product($productId,
-					$sales,
-					$this->getProductIsExcludedFromSorting($productId),
-					$this->getProductPreviousOrder($productId));
-			}
-
-			return new ProductVariation($productId, $sales);
+		if(!function_exists("wc_get_product")) {
+			return NULL;
 		}
 
-		return NULL;
+		$product = wc_get_product($productId);
+		if(!$product) {
+			return NULL;
+		}
+
+		$sales = $this->getPostMeta($productId, $this->namer->getSalesMetaKeyName(), []);
+		if($product->get_parent_id()) {
+			return new Product($product->get_id(),
+				$sales,
+				$this->getProductIsExcludedFromSorting($product->get_id()),
+				$this->getProductPreviousOrder($product->get_id()));
+		}
+
+		return new ProductVariation($product->get_id(), $sales);
 	}
 
 	/**
@@ -61,12 +63,12 @@ final class Api implements ApiInterface {
 	 * @param $default
 	 * @return mixed
 	 */
-	public function getPostMeta(int $postId, string $metaKey, $default) {
-		if(function_exists("get_post_meta")) {
-			return get_post_meta($postId, $metaKey, TRUE) ?: $default;
+	public function getPostMeta(int $postId, string $metaKey, $default = NULL) {
+		if(!function_exists("get_post_meta")) {
+			return $default;
 		}
 
-		return $default;
+		return get_post_meta($postId, $metaKey, TRUE) ?: $default;
 	}
 
 	/**
@@ -83,5 +85,43 @@ final class Api implements ApiInterface {
 	 */
 	public function getProductPreviousOrder(int $productId): int {
 		return (int) $this->getPostMeta($productId, $this->namer->getPreviousOrderMetaKeyName(), "-1");
+	}
+
+	/**
+	 * @param int $orderId
+	 * @return Order|null
+	 * @throws InvalidKeyNameException
+	 */
+	public function getOrder(int $orderId): ?Order {
+		if(!function_exists("wc_get_order")) {
+			return NULL;
+		}
+
+		$order = wc_get_order($orderId);
+		if(!$order) {
+			return NULL;
+		}
+
+		$lineItems = [];
+		foreach($order->get_items() as $orderItem) {
+			$orderItemData = $orderItem->get_data();
+			$lineItems[] =
+				new LineItem($orderItemData["id"] ?? 0,
+					$orderItemData["product_id"] ?? 0,
+					$orderItemData["quantity"] ?? 0,
+					$orderItemData["variation_id"] ?? 0);
+		}
+
+		return new Order($order->get_id(),
+			$order->get_date_created()->format("Y-m-d"),
+			$lineItems,
+			$this->getOrderIsRecorded($order->get_id()));
+	}
+
+	/**
+	 * @throws InvalidKeyNameException
+	 */
+	public function getOrderIsRecorded(int $orderId): bool {
+		return $this->getPostMeta($orderId, $this->namer->getRecordedMetaKeyName(), "no") === "yes";
 	}
 }

@@ -22,7 +22,7 @@ abstract class AbstractProduct {
 	 * @param int $id
 	 * @param array<string, array<int, int>> $sales
 	 */
-	public function __construct(int $id, array $sales = []) {
+	public function __construct(int $id, array $sales) {
 		$this->id = $id;
 		$this->sales = $sales;
 	}

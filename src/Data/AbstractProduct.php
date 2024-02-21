@@ -24,7 +24,7 @@ abstract class AbstractProduct implements JsonSerializable {
 	 * @param int $id
 	 * @param SalesPeriod[] $salesPeriods
 	 */
-	public function __construct(int $id, array $salesPeriods = []) {
+	public function __construct(int $id, array $salesPeriods) {
 		$this->id = $id;
 		foreach($salesPeriods as $salesPeriod) {
 			$this->addSalesPeriod($salesPeriod);
