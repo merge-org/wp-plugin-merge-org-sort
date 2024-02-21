@@ -23,34 +23,60 @@ final class Constants {
 	/**
 	 *
 	 */
-	public const META_FIELD_PRODUCT_SALES = "merge-org-sort-sales";
+	public const KEY_SALES = "sales";
 
 	/**
 	 *
 	 */
-	public const META_FIELD_PRODUCT_EXCLUDE_FROM_SORTING = "merge-org-sort-exclude_from_sorting";
+	public const KEY_EXCLUDE_FROM_SORTING = "exclude_from_sorting";
 
 	/**
 	 *
 	 */
-	public const META_FIELD_PRODUCT_PREVIOUS_ORDER = "merge-org-sort-previous_order";
+	public const KEY_PREVIOUS_ORDER = "previous_order";
 
 	/**
 	 *
 	 */
-	public const META_FIELD_ORDER_RECORDED = "merge-org-sort-recorded";
+	public const KEY_RECORDED = "recorded";
 
 	/**
 	 *
 	 */
-	public const SALES_PERIODS_IN_DAYS = [
-		1 => "daily",
-		7 => "weekly",
-		15 => "semiMonthly",
-		30 => "monthly",
-		90 => "quarterly",
-		180 => "semiAnnually",
-		365 => "yearly",
+	public const KEY_PERIOD_IN_DAYS = "period_in_days";
+
+	/**
+	 *
+	 */
+	public const SALES_PERIODS = [
+		1 => [
+			"daily",
+			"Daily",
+		],
+		7 => [
+			"weekly",
+			"Weekly",
+		],
+		15 => [
+			"semi_monthly",
+			"Semi-Monthly",
+		],
+		30 => [
+			"monthly",
+			"Monthly",
+		],
+		90 => [
+			"quarterly",
+			"Quarterly",
+		],
+		180 => [
+			"semi_annually",
+			"Semi-Annually",
+		],
+		365 => [
+			"yearly",
+			"Yearly",
+		],
 	];
 
 }
