@@ -197,4 +197,14 @@ final class Namer {
 		// TODO VALIDATE `periodInDays`
 		return "{$this->getPluginName()}-{$this->getKeyNameFromConstants("period_in_days")}-$periodInDays";
 	}
+
+	/**
+	 * @param int $periodInDays
+	 * @return string
+	 * @throws InvalidKeyNameException
+	 */
+	public function getPeriodInDaysQuantityMetaKeyName(int $periodInDays): string {
+		// TODO VALIDATE `periodInDays`
+		return "{$this->getPluginName()}-{$this->getKeyNameFromConstants("period_in_days_quantity")}-$periodInDays";
+	}
 }

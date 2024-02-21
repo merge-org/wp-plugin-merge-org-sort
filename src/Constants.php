@@ -48,6 +48,11 @@ final class Constants {
 	/**
 	 *
 	 */
+	public const KEY_PERIOD_IN_DAYS_QUANTITY = "period_in_days_quantity";
+
+	/**
+	 *
+	 */
 	public const SALES_PERIODS = [
 		1 => [
 			"daily",
