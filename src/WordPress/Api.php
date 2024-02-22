@@ -127,7 +127,7 @@ final class Api implements ApiInterface {
 		}
 
 		return new Order($order->get_id(),
-			$order->get_date_created()->format("Y-m-d"),
+			$order->get_date_paid()->format("Y-m-d"),
 			$lineItems,
 			$this->getOrderIsRecorded($order->get_id()));
 	}
