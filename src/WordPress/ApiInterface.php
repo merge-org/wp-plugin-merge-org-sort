@@ -17,6 +17,14 @@ interface ApiInterface {
 	public function getPostMeta(int $postId, string $metaKey, $default = NULL);
 
 	/**
+	 * @param int $postId
+	 * @param string $metaKey
+	 * @param mixed $value
+	 * @return bool
+	 */
+	public function updatePostMeta(int $postId, string $metaKey, $value): bool;
+
+	/**
 	 * @param int $productId
 	 * @return AbstractProduct|null
 	 */

@@ -159,11 +159,14 @@ final class Namer {
 	}
 
 	/**
+	 * @param bool $hidden
 	 * @return string
 	 * @throws InvalidKeyNameException
 	 */
-	public function getRecordedMetaKeyName(): string {
-		return "{$this->getPluginName()}-{$this->getKeyNameFromConstants("recorded")}";
+	public function getRecordedMetaKeyName(bool $hidden = TRUE): string {
+		$prefix = "";
+		$hidden && ($prefix = "_");
+		return "$prefix{$this->getPluginName()}-{$this->getKeyNameFromConstants("recorded")}";
 	}
 
 	/**

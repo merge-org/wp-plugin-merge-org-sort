@@ -21,19 +21,12 @@ final class ProductToBeIncrementedCollectionGenerator {
 	private SalesIncrementer $salesIncrementer;
 
 	/**
-	 * @var SalesPeriodManager
-	 */
-	private SalesPeriodManager $salesPeriodsManager;
-
-	/**
 	 * @param ApiInterface $api
 	 * @param SalesIncrementer $salesIncrementer
-	 * @param SalesPeriodManager $salesPeriodManager
 	 */
-	public function __construct(ApiInterface $api, SalesIncrementer $salesIncrementer, SalesPeriodManager $salesPeriodManager) {
+	public function __construct(ApiInterface $api, SalesIncrementer $salesIncrementer) {
 		$this->api = $api;
 		$this->salesIncrementer = $salesIncrementer;
-		$this->salesPeriodsManager = $salesPeriodManager;
 	}
 
 	/**
@@ -59,9 +52,9 @@ final class ProductToBeIncrementedCollectionGenerator {
 
 			$productSalesToBeUpdated =
 				$this->salesIncrementer->increment($product->getSales(), $lineItem->getQuantity(), $order->getDate());
-			$productSalesPeriods = $this->salesPeriodsManager->getAllSalesPeriods($productSalesToBeUpdated);
 			$productToBeIncrementedCollection->addProductToBeIncremented(new ProductToBeIncremented($product->getId(),
-				$productSalesToBeUpdated, $productSalesPeriods));
+				$productSalesToBeUpdated));
+
 			if($lineItem->getVariationId()) {
 				$variation = $this->api->getProduct($lineItem->getVariationId());
 				if(!$variation) {
@@ -69,9 +62,8 @@ final class ProductToBeIncrementedCollectionGenerator {
 				}
 				$variationSalesToBeUpdated =
 					$this->salesIncrementer->increment($variation->getSales(), $lineItem->getQuantity(), $order->getDate());
-				$variationSalesPeriods = $this->salesPeriodsManager->getAllSalesPeriods($variationSalesToBeUpdated);
 				$productToBeIncrementedCollection->addProductToBeIncremented(new ProductVariationToBeIncremented($variation->getId(),
-					$variationSalesToBeUpdated, $variationSalesPeriods));
+					$variationSalesToBeUpdated));
 			}
 		}
 

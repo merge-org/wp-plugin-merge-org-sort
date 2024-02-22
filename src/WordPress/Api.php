@@ -88,6 +88,20 @@ final class Api implements ApiInterface {
 	}
 
 	/**
+	 * @param int $postId
+	 * @param string $metaKey
+	 * @param mixed $value
+	 * @return bool
+	 */
+	public function updatePostMeta(int $postId, string $metaKey, $value): bool {
+		if(!function_exists("update_post_meta")) {
+			return FALSE;
+		}
+
+		return (bool) update_post_meta($postId, $metaKey, $value);
+	}
+
+	/**
 	 * @param int $orderId
 	 * @return Order|null
 	 * @throws InvalidKeyNameException
