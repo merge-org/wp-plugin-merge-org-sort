@@ -106,14 +106,16 @@ final class ActionsRegistrar {
 		if(!$this->got) {
 			$this->definitions[Namer::class] = $namer = new Namer();
 			$this->definitions[Logger::class] = new Logger($namer);
+			$this->definitions[Cache::class] = $cache = new Cache();
 			$this->definitions[ApiInterface::class] = $api = new Api($namer);
 			$this->definitions[SalesPeriodManager::class] = $salesPeriodManager = new SalesPeriodManager($namer);
-			$this->definitions[ProductRepository::class] = new ProductRepository($api, $salesPeriodManager);
+			$this->definitions[ProductRepository::class] =
+			$productRepository = new ProductRepository($api, $salesPeriodManager, $cache, $namer);
 			$this->definitions[SalesIncrementer::class] = $salesIncrementer = new SalesIncrementer();
 			$this->definitions[ProductToBeIncrementedCollectionGenerator::class] =
 			$productToBeIncrementedCollectionGenerator = new ProductToBeIncrementedCollectionGenerator($api, $salesIncrementer);
 			$this->definitions[OrderRecorder::class] =
-				new OrderRecorder($productToBeIncrementedCollectionGenerator, $api, $namer);
+				new OrderRecorder($productToBeIncrementedCollectionGenerator, $api, $namer, $productRepository);
 			$this->got = TRUE;
 		}
 

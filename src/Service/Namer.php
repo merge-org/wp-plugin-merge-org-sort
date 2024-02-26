@@ -66,6 +66,17 @@ final class Namer {
 	}
 
 	/**
+	 * @param int $productId
+	 * @return string
+	 * @throws InvalidKeyNameSortException
+	 */
+	public function getProductCacheKey(int $productId): string {
+		$productCacheKey = "{$this->getPluginName()}-{$this->getKeyNameFromConstants("product_cache")}";
+
+		return "$productCacheKey-$productId";
+	}
+
+	/**
 	 * @return string
 	 * @throws InvalidKeyNameSortException
 	 */

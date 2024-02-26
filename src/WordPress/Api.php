@@ -38,13 +38,96 @@ final class Api implements ApiInterface {
 	 * @param string $metaKey
 	 * @param mixed $value
 	 * @return bool
+	 * @throws InvalidKeyNameSortException
 	 */
 	public function updatePostMeta(int $postId, string $metaKey, $value): bool {
 		if(!function_exists("update_post_meta")) {
 			return FALSE;
 		}
 
-		return (bool) update_post_meta($postId, $metaKey, $value);
+		// TODO THIS HAS TO BE SEPARATE METHODS
+		// TODO `UPDATE_ORDER_META`, `UPDATE_PRODUCT_META` ETC
+		if($this->getProduct($postId)) {
+			// Cache busting
+			$product = wc_get_product($postId);
+			$product->update_meta_data($metaKey, $value);
+			$product->save();
+			$update = TRUE;
+		} elseif($this->getOrder($postId)) {
+			$order = wc_get_order($postId);
+			$order->update_meta_data($metaKey, $value);
+			$order->save();
+			$update = TRUE;
+		} else {
+			$update = (bool) update_post_meta($postId, $metaKey, $value);
+		}
+
+		return $update;
+	}
+
+	/**
+	 * @param int $productId
+	 * @return AbstractProduct|null
+	 * @throws InvalidKeyNameSortException
+	 */
+	public function getProduct(int $productId): ?AbstractProduct {
+		if(!function_exists("wc_get_product")) {
+			return NULL;
+		}
+
+		$product = wc_get_product($productId);
+		if(!$product) {
+			return NULL;
+		}
+
+		$sales = $this->getPostMeta($productId, $this->namer->getSalesMetaKeyName(), []);
+		if($product->get_parent_id()) {
+			return new Product($product->get_id(),
+				$sales,
+				$this->getProductIsExcludedFromSorting($product->get_id()),
+				$this->getProductPreviousOrder($product->get_id()),
+				$this->getProductLastIndexUpdate($product->get_id()),
+			);
+		}
+
+		return new ProductVariation($product->get_id(), $sales);
+	}
+
+	/**
+	 * @param int $postId
+	 * @param string $metaKey
+	 * @param $default
+	 * @return mixed
+	 */
+	public function getPostMeta(int $postId, string $metaKey, $default = NULL) {
+		if(!function_exists("get_post_meta")) {
+			return $default;
+		}
+
+		return get_post_meta($postId, $metaKey, TRUE) ?: $default;
+	}
+
+	/**
+	 * @param int $productId
+	 * @return bool
+	 * @throws InvalidKeyNameSortException
+	 */
+	public function getProductIsExcludedFromSorting(int $productId): bool {
+		return $this->getPostMeta($productId, $this->namer->getExcludeFromSortingMetaKeyName(), "no") === "yes";
+	}
+
+	/**
+	 * @throws InvalidKeyNameSortException
+	 */
+	public function getProductPreviousOrder(int $productId): int {
+		return (int) $this->getPostMeta($productId, $this->namer->getPreviousOrderMetaKeyName(), "-1");
+	}
+
+	/**
+	 * @throws InvalidKeyNameSortException
+	 */
+	public function getProductLastIndexUpdate(int $productId): string {
+		return $this->getPostMeta($productId, $this->namer->getLastIndexUpdateMetaKeyName(), "1970-01-01");
 	}
 
 	/**
@@ -86,20 +169,6 @@ final class Api implements ApiInterface {
 	}
 
 	/**
-	 * @param int $postId
-	 * @param string $metaKey
-	 * @param $default
-	 * @return mixed
-	 */
-	public function getPostMeta(int $postId, string $metaKey, $default = NULL) {
-		if(!function_exists("get_post_meta")) {
-			return $default;
-		}
-
-		return get_post_meta($postId, $metaKey, TRUE) ?: $default;
-	}
-
-	/**
 	 * @return AbstractProduct[]
 	 * @throws InvalidKeyNameSortException
 	 */
@@ -136,56 +205,5 @@ final class Api implements ApiInterface {
 		}
 
 		return $products;
-	}
-
-	/**
-	 * @param int $productId
-	 * @return AbstractProduct|null
-	 * @throws InvalidKeyNameSortException
-	 */
-	public function getProduct(int $productId): ?AbstractProduct {
-		if(!function_exists("wc_get_product")) {
-			return NULL;
-		}
-
-		$product = wc_get_product($productId);
-		if(!$product) {
-			return NULL;
-		}
-
-		$sales = $this->getPostMeta($productId, $this->namer->getSalesMetaKeyName(), []);
-		if($product->get_parent_id()) {
-			return new Product($product->get_id(),
-				$sales,
-				$this->getProductIsExcludedFromSorting($product->get_id()),
-				$this->getProductPreviousOrder($product->get_id()),
-				$this->getProductLastIndexUpdate($product->get_id()),
-			);
-		}
-
-		return new ProductVariation($product->get_id(), $sales);
-	}
-
-	/**
-	 * @param int $productId
-	 * @return bool
-	 * @throws InvalidKeyNameSortException
-	 */
-	public function getProductIsExcludedFromSorting(int $productId): bool {
-		return $this->getPostMeta($productId, $this->namer->getExcludeFromSortingMetaKeyName(), "no") === "yes";
-	}
-
-	/**
-	 * @throws InvalidKeyNameSortException
-	 */
-	public function getProductPreviousOrder(int $productId): int {
-		return (int) $this->getPostMeta($productId, $this->namer->getPreviousOrderMetaKeyName(), "-1");
-	}
-
-	/**
-	 * @throws InvalidKeyNameSortException
-	 */
-	public function getProductLastIndexUpdate(int $productId): string {
-		return $this->getPostMeta($productId, $this->namer->getLastIndexUpdateMetaKeyName(), "1970-01-01");
 	}
 }

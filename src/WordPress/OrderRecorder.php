@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MergeOrg\Sort\WordPress;
 
 use MergeOrg\Sort\Service\Namer;
+use MergeOrg\Sort\Service\ProductRepository;
 use MergeOrg\Sort\Exception\InvalidKeyNameSortException;
 use MergeOrg\Sort\Service\ProductToBeIncrementedCollectionGenerator;
 
@@ -31,16 +32,24 @@ final class OrderRecorder {
 	private Namer $namer;
 
 	/**
+	 * @var ProductRepository
+	 */
+	private ProductRepository $productRepository;
+
+	/**
 	 * @param ProductToBeIncrementedCollectionGenerator $productToBeIncrementedCollectionGenerator
 	 * @param ApiInterface $api
 	 * @param Namer $namer
+	 * @param ProductRepository $productRepository
 	 */
 	public function __construct(ProductToBeIncrementedCollectionGenerator $productToBeIncrementedCollectionGenerator,
 		ApiInterface $api,
-		Namer $namer) {
+		Namer $namer,
+		ProductRepository $productRepository) {
 		$this->productToBeIncrementedCollectionGenerator = $productToBeIncrementedCollectionGenerator;
 		$this->api = $api;
 		$this->namer = $namer;
+		$this->productRepository = $productRepository;
 	}
 
 	/**
@@ -56,6 +65,8 @@ final class OrderRecorder {
 			$this->api->updatePostMeta($productToBeIncremented->getId(),
 				$this->namer->getSalesMetaKeyName(),
 				$productToBeIncremented->getSalesToBeUpdated());
+
+			$this->productRepository->getProduct($productToBeIncremented->getId());
 		}
 
 		// TODO SPECIFIC ORDER METHOD
