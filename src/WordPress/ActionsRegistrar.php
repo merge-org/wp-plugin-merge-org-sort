@@ -4,10 +4,11 @@ declare(strict_types=1);
 namespace MergeOrg\Sort\WordPress;
 
 use MergeOrg\Sort\Service\Namer;
+use MergeOrg\Sort\Exception\SortException;
 use MergeOrg\Sort\Service\SalesIncrementer;
 use MergeOrg\Sort\Service\ProductRepository;
 use MergeOrg\Sort\Service\SalesPeriodManager;
-use MergeOrg\Sort\Exception\InvalidKeyNameException;
+use MergeOrg\Sort\Exception\InvalidKeyNameSortException;
 use MergeOrg\Sort\Service\ProductToBeIncrementedCollectionGenerator;
 
 /**
@@ -45,7 +46,7 @@ final class ActionsRegistrar {
 
 	/**
 	 * @return self
-	 * @throws InvalidKeyNameException
+	 * @throws InvalidKeyNameSortException
 	 */
 	public static function construct(): self {
 		if(self::$instance ?? NULL) {
@@ -60,12 +61,14 @@ final class ActionsRegistrar {
 
 	/**
 	 * @return void
-	 * @throws InvalidKeyNameException
+	 * @throws InvalidKeyNameSortException
 	 */
 	public function __invoke() {
 		if($this->invoked) {
 			return;
 		}
+
+		$logger = $this->get(Logger::class);
 
 		if(!function_exists("wc_get_order")) {
 			add_action("admin_notices", function() {
@@ -74,44 +77,23 @@ final class ActionsRegistrar {
 			return;
 		}
 
+		add_action("woocommerce_order_status_processing", function(int $orderId) use ($logger) {
+			try {
+				$this->get(OrderRecorder::class)->record($orderId);
+			} catch(SortException $sortException) {
+				/**
+				 * @var Logger $logger
+				 */
+				$logger->log("error", "{$sortException->getMessage()}: {$sortException->getTraceAsString()}");
+
+				throw $sortException;
+			}
+		});
+
 		/**
 		 * This should fire only in a dev environment
-		 * TODO REMOVE FROM BUILD
 		 */
-		file_exists(__DIR__ . "/../inc/dev-actions.php") && require_once __DIR__ . "/../inc/dev-actions.php";
-
-		add_action("woocommerce_order_status_processing",
-			/**
-			 * @throws InvalidKeyNameException
-			 */
-			function(int $orderId) {
-				/**
-				 * @var ProductToBeIncrementedCollectionGenerator $productToBeIncrementedCollectionGenerator
-				 */
-				$productToBeIncrementedCollectionGenerator = $this->get(ProductToBeIncrementedCollectionGenerator::class);
-
-				/**
-				 * @var ApiInterface $api
-				 */
-				$api = $this->get(ApiInterface::class);
-
-				/**
-				 * @var Namer $namer
-				 */
-				$namer = $this->get(Namer::class);
-
-				$productToBeIncrementedCollection = $productToBeIncrementedCollectionGenerator->generate($orderId);
-
-				foreach($productToBeIncrementedCollection->getCollection() as $productToBeIncremented) {
-					// TODO SPECIFIC PRODUCT METHOD
-					$api->updatePostMeta($productToBeIncremented->getId(),
-						$namer->getSalesMetaKeyName(),
-						$productToBeIncremented->getSalesToBeUpdated());
-				}
-
-				// TODO SPECIFIC ORDER METHOD
-				$api->updatePostMeta($orderId, $namer->getRecordedMetaKeyName(), "yes");
-			});
+		file_exists(__DIR__ . "/../dev-inc/dev-actions.php") && require_once __DIR__ . "/../dev-inc/dev-actions.php";
 
 		$this->invoked = TRUE;
 	}
@@ -123,12 +105,15 @@ final class ActionsRegistrar {
 	private function get(string $key) {
 		if(!$this->got) {
 			$this->definitions[Namer::class] = $namer = new Namer();
+			$this->definitions[Logger::class] = new Logger($namer);
 			$this->definitions[ApiInterface::class] = $api = new Api($namer);
 			$this->definitions[SalesPeriodManager::class] = $salesPeriodManager = new SalesPeriodManager($namer);
 			$this->definitions[ProductRepository::class] = new ProductRepository($api, $salesPeriodManager);
 			$this->definitions[SalesIncrementer::class] = $salesIncrementer = new SalesIncrementer();
 			$this->definitions[ProductToBeIncrementedCollectionGenerator::class] =
-				new ProductToBeIncrementedCollectionGenerator($api, $salesIncrementer);
+			$productToBeIncrementedCollectionGenerator = new ProductToBeIncrementedCollectionGenerator($api, $salesIncrementer);
+			$this->definitions[OrderRecorder::class] =
+				new OrderRecorder($productToBeIncrementedCollectionGenerator, $api, $namer);
 			$this->got = TRUE;
 		}
 

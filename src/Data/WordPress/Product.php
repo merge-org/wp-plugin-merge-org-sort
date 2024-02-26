@@ -18,18 +18,26 @@ final class Product extends AbstractProduct {
 	private int $previousMenuOrder;
 
 	/**
+	 * @var string
+	 */
+	private string $lastIndexUpdate;
+
+	/**
 	 * @param int $id
 	 * @param array<string, array<int, int>> $sales
 	 * @param bool $excludedFromSorting
 	 * @param int $previousMenuOrder
+	 * @param string $lastIndexUpdate
 	 */
 	public function __construct(int $id,
 		array $sales = [],
 		bool $excludedFromSorting = FALSE,
-		int $previousMenuOrder = -1) {
+		int $previousMenuOrder = -1,
+		string $lastIndexUpdate = "1970-01-01") {
 		parent::__construct($id, $sales);
 		$this->excludedFromSorting = $excludedFromSorting;
 		$this->previousMenuOrder = $previousMenuOrder;
+		$this->lastIndexUpdate = $lastIndexUpdate;
 	}
 
 	/**
@@ -51,5 +59,12 @@ final class Product extends AbstractProduct {
 	 */
 	function getType(): string {
 		return Constants::POST_TYPE_PRODUCT;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getLastIndexUpdate(): string {
+		return $this->lastIndexUpdate;
 	}
 }

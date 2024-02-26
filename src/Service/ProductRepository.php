@@ -49,7 +49,8 @@ final class ProductRepository {
 			return new Product($wordPressProduct->getId(),
 				$salesPeriods,
 				$wordPressProduct->isExcludedFromSorting(),
-				$wordPressProduct->getPreviousMenuOrder());
+				$wordPressProduct->getPreviousMenuOrder(),
+				$wordPressProduct->getLastIndexUpdate());
 		}
 
 		/**

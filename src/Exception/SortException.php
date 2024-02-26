@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort\Exception;
 
-final class InvalidKeyNameException extends Exception {
+use Exception;
+
+abstract class SortException extends Exception {
 
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace MergeOrg\Sort\Service;
 
 use MergeOrg\Sort\Constants;
-use MergeOrg\Sort\Exception\InvalidKeyNameException;
-use MergeOrg\Sort\Exception\InvalidPeriodInDaysException;
+use MergeOrg\Sort\Exception\InvalidKeyNameSortException;
+use MergeOrg\Sort\Exception\InvalidPeriodInDaysSortException;
 
 final class Namer {
 
@@ -26,7 +26,7 @@ final class Namer {
 
 	/**
 	 * @return string
-	 * @throws InvalidKeyNameException
+	 * @throws InvalidKeyNameSortException
 	 */
 	public function getSalesMetaKeyName(): string {
 		return "{$this->getPluginName()}-{$this->getKeyNameFromConstants("sales")}";
@@ -42,7 +42,7 @@ final class Namer {
 	/**
 	 * @param string $keyName
 	 * @return string
-	 * @throws InvalidKeyNameException
+	 * @throws InvalidKeyNameSortException
 	 */
 	private function getKeyNameFromConstants(string $keyName): string {
 		$keyName = strtoupper($keyName);
@@ -56,13 +56,21 @@ final class Namer {
 	/**
 	 * @param string $keyName
 	 * @return void
-	 * @throws InvalidKeyNameException
+	 * @throws InvalidKeyNameSortException
 	 */
 	public function validateKeyName(string $keyName): void {
 		$keyNameParts = explode("-", $keyName);
 		if(count($keyNameParts) > 1) {
-			throw new InvalidKeyNameException("Invalid Meta Key Name: '$keyName'");
+			throw new InvalidKeyNameSortException("Invalid Meta Key Name: '$keyName'");
 		}
+	}
+
+	/**
+	 * @return string
+	 * @throws InvalidKeyNameSortException
+	 */
+	public function getLastIndexUpdateMetaKeyName(): string {
+		return "{$this->getPluginName()}-{$this->getKeyNameFromConstants("last_index_update")}";
 	}
 
 	/**
@@ -89,7 +97,7 @@ final class Namer {
 	/**
 	 * @param int $periodInDays
 	 * @return string
-	 * @throws InvalidPeriodInDaysException
+	 * @throws InvalidPeriodInDaysSortException
 	 */
 	public function getSalesPeriodLabelByPeriodInDays(int $periodInDays): string {
 		return $this->getSalesPeriodsLabels()[$this->getSalesPeriodInDaysIndexByPeriodInDays($periodInDays)];
@@ -111,7 +119,7 @@ final class Namer {
 	/**
 	 * @param int $periodInDays
 	 * @return int
-	 * @throws InvalidPeriodInDaysException
+	 * @throws InvalidPeriodInDaysSortException
 	 */
 	public function getSalesPeriodInDaysIndexByPeriodInDays(int $periodInDays): int {
 		foreach($this->getSalesPeriodsInDays() as $index => $periodInDays_) {
@@ -120,7 +128,7 @@ final class Namer {
 			}
 		}
 
-		throw new InvalidPeriodInDaysException("Invalid Period In Days: '$periodInDays'");
+		throw new InvalidPeriodInDaysSortException("Invalid Period In Days: '$periodInDays'");
 	}
 
 	/**
@@ -144,7 +152,7 @@ final class Namer {
 
 	/**
 	 * @return string
-	 * @throws InvalidKeyNameException
+	 * @throws InvalidKeyNameSortException
 	 */
 	public function getExcludeFromSortingMetaKeyName(): string {
 		return "{$this->getPluginName()}-{$this->getKeyNameFromConstants("exclude_from_sorting")}";
@@ -152,7 +160,7 @@ final class Namer {
 
 	/**
 	 * @return string
-	 * @throws InvalidKeyNameException
+	 * @throws InvalidKeyNameSortException
 	 */
 	public function getPreviousOrderMetaKeyName(): string {
 		return "{$this->getPluginName()}-{$this->getKeyNameFromConstants("previous_order")}";
@@ -161,7 +169,7 @@ final class Namer {
 	/**
 	 * @param bool $hidden
 	 * @return string
-	 * @throws InvalidKeyNameException
+	 * @throws InvalidKeyNameSortException
 	 */
 	public function getRecordedMetaKeyName(bool $hidden = TRUE): string {
 		$prefix = "";
@@ -172,8 +180,8 @@ final class Namer {
 	/**
 	 * @param int $periodInDays
 	 * @return string
-	 * @throws InvalidKeyNameException
-	 * @throws InvalidPeriodInDaysException
+	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidPeriodInDaysSortException
 	 */
 	public function getPeriodInDaysColumnName(int $periodInDays): string {
 		// TODO VALIDATE `periodInDays`
@@ -185,7 +193,7 @@ final class Namer {
 	/**
 	 * @param int $periodInDays
 	 * @return string
-	 * @throws InvalidPeriodInDaysException
+	 * @throws InvalidPeriodInDaysSortException
 	 */
 	public function getSalesPeriodSlugByPeriodInDays(int $periodInDays): string {
 		return $this->getSalesPeriodsSlugs()[$this->getSalesPeriodInDaysIndexByPeriodInDays($periodInDays)];
@@ -194,7 +202,7 @@ final class Namer {
 	/**
 	 * @param int $periodInDays
 	 * @return string
-	 * @throws InvalidKeyNameException
+	 * @throws InvalidKeyNameSortException
 	 */
 	public function getPeriodInDaysMetaKeyName(int $periodInDays): string {
 		// TODO VALIDATE `periodInDays`
@@ -204,7 +212,7 @@ final class Namer {
 	/**
 	 * @param int $periodInDays
 	 * @return string
-	 * @throws InvalidKeyNameException
+	 * @throws InvalidKeyNameSortException
 	 */
 	public function getPeriodInDaysQuantityMetaKeyName(int $periodInDays): string {
 		// TODO VALIDATE `periodInDays`
