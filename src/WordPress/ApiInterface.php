@@ -10,44 +10,44 @@ use MergeOrg\Sort\Exception\InvalidKeyNameSortException;
 interface ApiInterface {
 
 	/**
-	 * @param int $postId
+	 * @param int    $postId
 	 * @param string $metaKey
-	 * @param mixed $default
+	 * @param mixed  $default
 	 * @return mixed
 	 */
-	public function getPostMeta(int $postId, string $metaKey, $default = NULL);
+	public function getPostMeta( int $postId, string $metaKey, $default = null );
 
 	/**
-	 * @param int $postId
+	 * @param int    $postId
 	 * @param string $metaKey
-	 * @param mixed $value
+	 * @param mixed  $value
 	 * @return bool
 	 */
-	public function updatePostMeta(int $postId, string $metaKey, $value): bool;
+	public function updatePostMeta( int $postId, string $metaKey, $value ): bool;
 
 	/**
 	 * @param int $productId
 	 * @return AbstractProduct|null
 	 */
-	public function getProduct(int $productId): ?AbstractProduct;
+	public function getProduct( int $productId ): ?AbstractProduct;
 
 	/**
 	 * @param int $productId
 	 * @return bool
 	 */
-	public function getProductIsExcludedFromSorting(int $productId): bool;
+	public function getProductIsExcludedFromSorting( int $productId ): bool;
 
 	/**
 	 * @param int $productId
 	 * @return int
 	 */
-	public function getProductPreviousOrder(int $productId): int;
+	public function getProductPreviousOrder( int $productId ): int;
 
 	/**
 	 * @param int $orderId
 	 * @return Order|null
 	 */
-	public function getOrder(int $orderId): ?Order;
+	public function getOrder( int $orderId ): ?Order;
 
 	/**
 	 * @return AbstractProduct[]

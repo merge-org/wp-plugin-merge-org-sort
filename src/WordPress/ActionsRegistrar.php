@@ -32,12 +32,12 @@ final class ActionsRegistrar {
 	/**
 	 * @var bool
 	 */
-	private bool $got = FALSE;
+	private bool $got = false;
 
 	/**
 	 * @var bool
 	 */
-	private bool $invoked = FALSE;
+	private bool $invoked = false;
 
 	/**
 	 *
@@ -49,7 +49,7 @@ final class ActionsRegistrar {
 	 * @throws InvalidKeyNameSortException
 	 */
 	public static function construct(): self {
-		if(self::$instance ?? NULL) {
+		if ( self::$instance ?? null ) {
 			return self::$instance;
 		}
 
@@ -64,61 +64,67 @@ final class ActionsRegistrar {
 	 * @throws InvalidKeyNameSortException
 	 */
 	public function __invoke() {
-		if($this->invoked) {
+		if ( $this->invoked ) {
 			return;
 		}
 
-		$logger = $this->get(Logger::class);
+		$logger = $this->get( Logger::class );
 
-		if(!function_exists("wc_get_order")) {
-			add_action("admin_notices", function() {
-				echo "<div class='notice notice-error'><p><strong>Woocommerce</strong> is not activated. <strong>Sort</strong> will not work until <strong>WooCommerce</strong> is activated back again.</p></div>";
-			});
+		if ( ! function_exists( 'wc_get_order' ) ) {
+			add_action(
+				'admin_notices',
+				function () {
+					echo "<div class='notice notice-error'><p><strong>Woocommerce</strong> is not activated. <strong>Sort</strong> will not work until <strong>WooCommerce</strong> is activated back again.</p></div>";
+				}
+			);
 			return;
 		}
 
-		add_action("woocommerce_order_status_processing", function(int $orderId) use ($logger) {
-			try {
-				$this->get(OrderRecorder::class)->record($orderId);
-			} catch(SortException $sortException) {
-				/**
-				 * @var Logger $logger
-				 */
-				$logger->log("error", "{$sortException->getMessage()}: {$sortException->getTraceAsString()}");
+		add_action(
+			'woocommerce_order_status_processing',
+			function ( int $orderId ) use ( $logger ) {
+				try {
+					$this->get( OrderRecorder::class )->record( $orderId );
+				} catch ( SortException $sortException ) {
+					/**
+					 * @var Logger $logger
+					 */
+					$logger->log( 'error', "{$sortException->getMessage()}: {$sortException->getTraceAsString()}" );
 
-				throw $sortException;
+					throw $sortException;
+				}
 			}
-		});
+		);
 
 		/**
 		 * This should fire only in a dev environment
 		 */
-		file_exists(__DIR__ . "/../dev-inc/dev-actions.php") && require_once __DIR__ . "/../dev-inc/dev-actions.php";
+		file_exists( __DIR__ . '/../dev-inc/dev-actions.php' ) && require_once __DIR__ . '/../dev-inc/dev-actions.php';
 
-		$this->invoked = TRUE;
+		$this->invoked = true;
 	}
 
 	/**
 	 * @param string $key
 	 * @return mixed
 	 */
-	private function get(string $key) {
-		if(!$this->got) {
-			$this->definitions[Namer::class] = $namer = new Namer();
-			$this->definitions[Logger::class] = new Logger($namer);
-			$this->definitions[Cache::class] = $cache = new Cache();
-			$this->definitions[ApiInterface::class] = $api = new Api($namer);
-			$this->definitions[SalesPeriodManager::class] = $salesPeriodManager = new SalesPeriodManager($namer);
-			$this->definitions[ProductRepository::class] =
-			$productRepository = new ProductRepository($api, $salesPeriodManager, $cache, $namer);
-			$this->definitions[SalesIncrementer::class] = $salesIncrementer = new SalesIncrementer();
-			$this->definitions[ProductToBeIncrementedCollectionGenerator::class] =
-			$productToBeIncrementedCollectionGenerator = new ProductToBeIncrementedCollectionGenerator($api, $salesIncrementer);
-			$this->definitions[OrderRecorder::class] =
-				new OrderRecorder($productToBeIncrementedCollectionGenerator, $api, $namer, $productRepository);
-			$this->got = TRUE;
+	private function get( string $key ) {
+		if ( ! $this->got ) {
+			$this->definitions[ Namer::class ]              = $namer = new Namer();
+			$this->definitions[ Logger::class ]             = new Logger( $namer );
+			$this->definitions[ Cache::class ]              = $cache = new Cache();
+			$this->definitions[ ApiInterface::class ]       = $api = new Api( $namer );
+			$this->definitions[ SalesPeriodManager::class ] = $salesPeriodManager = new SalesPeriodManager( $namer );
+			$this->definitions[ ProductRepository::class ]  =
+			$productRepository                              = new ProductRepository( $api, $salesPeriodManager, $cache, $namer );
+			$this->definitions[ SalesIncrementer::class ]   = $salesIncrementer = new SalesIncrementer();
+			$this->definitions[ ProductToBeIncrementedCollectionGenerator::class ] =
+			$productToBeIncrementedCollectionGenerator                             = new ProductToBeIncrementedCollectionGenerator( $api, $salesIncrementer );
+			$this->definitions[ OrderRecorder::class ]                             =
+				new OrderRecorder( $productToBeIncrementedCollectionGenerator, $api, $namer, $productRepository );
+			$this->got = true;
 		}
 
-		return $this->definitions[$key];
+		return $this->definitions[ $key ];
 	}
 }

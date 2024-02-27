@@ -9,13 +9,13 @@ interface CacheInterface {
 	 * @param string $key
 	 * @return false|mixed|null
 	 */
-	public function get(string $key);
+	public function get( string $key );
 
 	/**
 	 * @param string $key
-	 * @param mixed $data
-	 * @param int $ttl
+	 * @param mixed  $data
+	 * @param int    $ttl
 	 * @return bool
 	 */
-	public function set(string $key, $data, int $ttl = 0): bool;
+	public function set( string $key, $data, int $ttl = 0 ): bool;
 }

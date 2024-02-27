@@ -23,21 +23,23 @@ final class Product extends AbstractProduct {
 	private string $lastIndexUpdate;
 
 	/**
-	 * @param int $id
+	 * @param int                            $id
 	 * @param array<string, array<int, int>> $sales
-	 * @param bool $excludedFromSorting
-	 * @param int $previousMenuOrder
-	 * @param string $lastIndexUpdate
+	 * @param bool                           $excludedFromSorting
+	 * @param int                            $previousMenuOrder
+	 * @param string                         $lastIndexUpdate
 	 */
-	public function __construct(int $id,
-		array $sales = [],
-		bool $excludedFromSorting = FALSE,
+	public function __construct(
+		int $id,
+		array $sales = array(),
+		bool $excludedFromSorting = false,
 		int $previousMenuOrder = -1,
-		string $lastIndexUpdate = "1970-01-01") {
-		parent::__construct($id, $sales);
+		string $lastIndexUpdate = '1970-01-01'
+	) {
+		parent::__construct( $id, $sales );
 		$this->excludedFromSorting = $excludedFromSorting;
-		$this->previousMenuOrder = $previousMenuOrder;
-		$this->lastIndexUpdate = $lastIndexUpdate;
+		$this->previousMenuOrder   = $previousMenuOrder;
+		$this->lastIndexUpdate     = $lastIndexUpdate;
 	}
 
 	/**

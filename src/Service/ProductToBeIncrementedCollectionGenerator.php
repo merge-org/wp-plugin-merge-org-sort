@@ -21,11 +21,11 @@ final class ProductToBeIncrementedCollectionGenerator {
 	private SalesIncrementer $salesIncrementer;
 
 	/**
-	 * @param ApiInterface $api
+	 * @param ApiInterface     $api
 	 * @param SalesIncrementer $salesIncrementer
 	 */
-	public function __construct(ApiInterface $api, SalesIncrementer $salesIncrementer) {
-		$this->api = $api;
+	public function __construct( ApiInterface $api, SalesIncrementer $salesIncrementer ) {
+		$this->api              = $api;
 		$this->salesIncrementer = $salesIncrementer;
 	}
 
@@ -33,37 +33,45 @@ final class ProductToBeIncrementedCollectionGenerator {
 	 * @param int $orderId
 	 * @return ProductToBeIncrementedCollection|null
 	 */
-	public function generate(int $orderId): ?ProductToBeIncrementedCollection {
-		$order = $this->api->getOrder($orderId);
-		if(!$order || !$order->getId() || $order->isRecorded()) {
-			return NULL;
+	public function generate( int $orderId ): ?ProductToBeIncrementedCollection {
+		$order = $this->api->getOrder( $orderId );
+		if ( ! $order || ! $order->getId() || $order->isRecorded() ) {
+			return null;
 		}
 
 		$productToBeIncrementedCollection = new ProductToBeIncrementedCollection();
-		foreach($order->getLineItems() as $lineItem) {
-			if(!$lineItem->getId()) {
+		foreach ( $order->getLineItems() as $lineItem ) {
+			if ( ! $lineItem->getId() ) {
 				continue;
 			}
 
-			$product = $this->api->getProduct($lineItem->getProductId());
-			if(!$product) {
+			$product = $this->api->getProduct( $lineItem->getProductId() );
+			if ( ! $product ) {
 				continue;
 			}
 
 			$productSalesToBeUpdated =
-				$this->salesIncrementer->increment($product->getSales(), $lineItem->getQuantity(), $order->getDate());
-			$productToBeIncrementedCollection->addProductToBeIncremented(new ProductToBeIncremented($product->getId(),
-				$productSalesToBeUpdated));
+				$this->salesIncrementer->increment( $product->getSales(), $lineItem->getQuantity(), $order->getDate() );
+			$productToBeIncrementedCollection->addProductToBeIncremented(
+				new ProductToBeIncremented(
+					$product->getId(),
+					$productSalesToBeUpdated
+				)
+			);
 
-			if($lineItem->getVariationId()) {
-				$variation = $this->api->getProduct($lineItem->getVariationId());
-				if(!$variation) {
+			if ( $lineItem->getVariationId() ) {
+				$variation = $this->api->getProduct( $lineItem->getVariationId() );
+				if ( ! $variation ) {
 					continue;
 				}
 				$variationSalesToBeUpdated =
-					$this->salesIncrementer->increment($variation->getSales(), $lineItem->getQuantity(), $order->getDate());
-				$productToBeIncrementedCollection->addProductToBeIncremented(new ProductVariationToBeIncremented($variation->getId(),
-					$variationSalesToBeUpdated));
+					$this->salesIncrementer->increment( $variation->getSales(), $lineItem->getQuantity(), $order->getDate() );
+				$productToBeIncrementedCollection->addProductToBeIncremented(
+					new ProductVariationToBeIncremented(
+						$variation->getId(),
+						$variationSalesToBeUpdated
+					)
+				);
 			}
 		}
 

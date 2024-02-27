@@ -15,7 +15,7 @@ final class SalesPeriodManager {
 	/**
 	 * @param Namer $namer
 	 */
-	public function __construct(Namer $namer) {
+	public function __construct( Namer $namer ) {
 		$this->namer = $namer;
 	}
 
@@ -23,10 +23,10 @@ final class SalesPeriodManager {
 	 * @param array<string, array<int,int>> $sales
 	 * @return SalesPeriod[]
 	 */
-	public function getAllSalesPeriods(array $sales): array {
-		$salesPeriods = [];
-		foreach($this->namer->getSalesPeriodsInDays() as $periodsInDay) {
-			$salesPeriods[] = $this->getSalesPeriodFromPeriodInDays($sales, $periodsInDay);
+	public function getAllSalesPeriods( array $sales ): array {
+		$salesPeriods = array();
+		foreach ( $this->namer->getSalesPeriodsInDays() as $periodsInDay ) {
+			$salesPeriods[] = $this->getSalesPeriodFromPeriodInDays( $sales, $periodsInDay );
 		}
 
 		return $salesPeriods;
@@ -34,30 +34,30 @@ final class SalesPeriodManager {
 
 	/**
 	 * @param array<string, array<int,int>> $sales
-	 * @param int $periodInDays
+	 * @param int                           $periodInDays
 	 * @return SalesPeriod|null
 	 */
-	public function getSalesPeriodFromPeriodInDays(array $sales, int $periodInDays): ?SalesPeriod {
-		$today = date("Y-m-d");
-		$furthestDateInPast = date("Y-m-d", strtotime("-$periodInDays days"));
+	public function getSalesPeriodFromPeriodInDays( array $sales, int $periodInDays ): ?SalesPeriod {
+		$today              = date( 'Y-m-d' );
+		$furthestDateInPast = date( 'Y-m-d', strtotime( "-$periodInDays days" ) );
 
-		$salesForPeriod = 0;
+		$salesForPeriod              = 0;
 		$quantityBasedSalesForPeriod = 0;
-		foreach($sales as $date => $dailySales) {
-			if($date === $today && $periodInDays === 1) {
-				$salesForPeriod = $dailySales[0];
+		foreach ( $sales as $date => $dailySales ) {
+			if ( $date === $today && $periodInDays === 1 ) {
+				$salesForPeriod              = $dailySales[0];
 				$quantityBasedSalesForPeriod = $dailySales[1];
 				break;
 			}
 
-			if($date < $furthestDateInPast || $date > $today) {
+			if ( $date < $furthestDateInPast || $date > $today ) {
 				continue;
 			}
 
-			$salesForPeriod += $dailySales[0];
+			$salesForPeriod              += $dailySales[0];
 			$quantityBasedSalesForPeriod += $dailySales[1];
 		}
 
-		return new SalesPeriod($periodInDays, $salesForPeriod, $quantityBasedSalesForPeriod);
+		return new SalesPeriod( $periodInDays, $salesForPeriod, $quantityBasedSalesForPeriod );
 	}
 }

@@ -31,10 +31,10 @@ final class LineItem {
 	 * @param int $variationId
 	 * @param int $quantity
 	 */
-	public function __construct(int $id, int $productId, int $quantity, int $variationId = 0) {
-		$this->id = $id;
-		$this->productId = $productId;
-		$this->quantity = $quantity;
+	public function __construct( int $id, int $productId, int $quantity, int $variationId = 0 ) {
+		$this->id          = $id;
+		$this->productId   = $productId;
+		$this->quantity    = $quantity;
 		$this->variationId = $variationId;
 	}
 

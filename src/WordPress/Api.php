@@ -29,37 +29,37 @@ final class Api implements ApiInterface {
 	/**
 	 * @param Namer $namer
 	 */
-	public function __construct(Namer $namer) {
+	public function __construct( Namer $namer ) {
 		$this->namer = $namer;
 	}
 
 	/**
-	 * @param int $postId
+	 * @param int    $postId
 	 * @param string $metaKey
-	 * @param mixed $value
+	 * @param mixed  $value
 	 * @return bool
 	 * @throws InvalidKeyNameSortException
 	 */
-	public function updatePostMeta(int $postId, string $metaKey, $value): bool {
-		if(!function_exists("update_post_meta")) {
-			return FALSE;
+	public function updatePostMeta( int $postId, string $metaKey, $value ): bool {
+		if ( ! function_exists( 'update_post_meta' ) ) {
+			return false;
 		}
 
 		// TODO THIS HAS TO BE SEPARATE METHODS
 		// TODO `UPDATE_ORDER_META`, `UPDATE_PRODUCT_META` ETC
-		if($this->getProduct($postId)) {
+		if ( $this->getProduct( $postId ) ) {
 			// Cache busting
-			$product = wc_get_product($postId);
-			$product->update_meta_data($metaKey, $value);
+			$product = wc_get_product( $postId );
+			$product->update_meta_data( $metaKey, $value );
 			$product->save();
-			$update = TRUE;
-		} elseif($this->getOrder($postId)) {
-			$order = wc_get_order($postId);
-			$order->update_meta_data($metaKey, $value);
+			$update = true;
+		} elseif ( $this->getOrder( $postId ) ) {
+			$order = wc_get_order( $postId );
+			$order->update_meta_data( $metaKey, $value );
 			$order->save();
-			$update = TRUE;
+			$update = true;
 		} else {
-			$update = (bool) update_post_meta($postId, $metaKey, $value);
+			$update = (bool) update_post_meta( $postId, $metaKey, $value );
 		}
 
 		return $update;
@@ -70,41 +70,42 @@ final class Api implements ApiInterface {
 	 * @return AbstractProduct|null
 	 * @throws InvalidKeyNameSortException
 	 */
-	public function getProduct(int $productId): ?AbstractProduct {
-		if(!function_exists("wc_get_product")) {
-			return NULL;
+	public function getProduct( int $productId ): ?AbstractProduct {
+		if ( ! function_exists( 'wc_get_product' ) ) {
+			return null;
 		}
 
-		$product = wc_get_product($productId);
-		if(!$product) {
-			return NULL;
+		$product = wc_get_product( $productId );
+		if ( ! $product ) {
+			return null;
 		}
 
-		$sales = $this->getPostMeta($productId, $this->namer->getSalesMetaKeyName(), []);
-		if($product->get_parent_id()) {
-			return new Product($product->get_id(),
+		$sales = $this->getPostMeta( $productId, $this->namer->getSalesMetaKeyName(), array() );
+		if ( $product->get_parent_id() ) {
+			return new Product(
+				$product->get_id(),
 				$sales,
-				$this->getProductIsExcludedFromSorting($product->get_id()),
-				$this->getProductPreviousOrder($product->get_id()),
-				$this->getProductLastIndexUpdate($product->get_id()),
+				$this->getProductIsExcludedFromSorting( $product->get_id() ),
+				$this->getProductPreviousOrder( $product->get_id() ),
+				$this->getProductLastIndexUpdate( $product->get_id() ),
 			);
 		}
 
-		return new ProductVariation($product->get_id(), $sales);
+		return new ProductVariation( $product->get_id(), $sales );
 	}
 
 	/**
-	 * @param int $postId
-	 * @param string $metaKey
+	 * @param int     $postId
+	 * @param string  $metaKey
 	 * @param $default
 	 * @return mixed
 	 */
-	public function getPostMeta(int $postId, string $metaKey, $default = NULL) {
-		if(!function_exists("get_post_meta")) {
+	public function getPostMeta( int $postId, string $metaKey, $default = null ) {
+		if ( ! function_exists( 'get_post_meta' ) ) {
 			return $default;
 		}
 
-		return get_post_meta($postId, $metaKey, TRUE) ?: $default;
+		return get_post_meta( $postId, $metaKey, true ) ?: $default;
 	}
 
 	/**
@@ -112,22 +113,22 @@ final class Api implements ApiInterface {
 	 * @return bool
 	 * @throws InvalidKeyNameSortException
 	 */
-	public function getProductIsExcludedFromSorting(int $productId): bool {
-		return $this->getPostMeta($productId, $this->namer->getExcludeFromSortingMetaKeyName(), "no") === "yes";
+	public function getProductIsExcludedFromSorting( int $productId ): bool {
+		return $this->getPostMeta( $productId, $this->namer->getExcludeFromSortingMetaKeyName(), 'no' ) === 'yes';
 	}
 
 	/**
 	 * @throws InvalidKeyNameSortException
 	 */
-	public function getProductPreviousOrder(int $productId): int {
-		return (int) $this->getPostMeta($productId, $this->namer->getPreviousOrderMetaKeyName(), "-1");
+	public function getProductPreviousOrder( int $productId ): int {
+		return (int) $this->getPostMeta( $productId, $this->namer->getPreviousOrderMetaKeyName(), '-1' );
 	}
 
 	/**
 	 * @throws InvalidKeyNameSortException
 	 */
-	public function getProductLastIndexUpdate(int $productId): string {
-		return $this->getPostMeta($productId, $this->namer->getLastIndexUpdateMetaKeyName(), "1970-01-01");
+	public function getProductLastIndexUpdate( int $productId ): string {
+		return $this->getPostMeta( $productId, $this->namer->getLastIndexUpdateMetaKeyName(), '1970-01-01' );
 	}
 
 	/**
@@ -135,37 +136,41 @@ final class Api implements ApiInterface {
 	 * @return Order|null
 	 * @throws InvalidKeyNameSortException
 	 */
-	public function getOrder(int $orderId): ?Order {
-		if(!function_exists("wc_get_order")) {
-			return NULL;
+	public function getOrder( int $orderId ): ?Order {
+		if ( ! function_exists( 'wc_get_order' ) ) {
+			return null;
 		}
 
-		$order = wc_get_order($orderId);
-		if(!$order) {
-			return NULL;
+		$order = wc_get_order( $orderId );
+		if ( ! $order ) {
+			return null;
 		}
 
-		$lineItems = [];
-		foreach($order->get_items() as $orderItem) {
+		$lineItems = array();
+		foreach ( $order->get_items() as $orderItem ) {
 			$orderItemData = $orderItem->get_data();
-			$lineItems[] =
-				new LineItem($orderItemData["id"] ?? 0,
-					$orderItemData["product_id"] ?? 0,
-					$orderItemData["quantity"] ?? 0,
-					$orderItemData["variation_id"] ?? 0);
+			$lineItems[]   =
+				new LineItem(
+					$orderItemData['id'] ?? 0,
+					$orderItemData['product_id'] ?? 0,
+					$orderItemData['quantity'] ?? 0,
+					$orderItemData['variation_id'] ?? 0
+				);
 		}
 
-		return new Order($order->get_id(),
-			$order->get_date_paid()->format("Y-m-d"),
+		return new Order(
+			$order->get_id(),
+			$order->get_date_paid()->format( 'Y-m-d' ),
 			$lineItems,
-			$this->getOrderIsRecorded($order->get_id()));
+			$this->getOrderIsRecorded( $order->get_id() )
+		);
 	}
 
 	/**
 	 * @throws InvalidKeyNameSortException
 	 */
-	public function getOrderIsRecorded(int $orderId): bool {
-		return $this->getPostMeta($orderId, $this->namer->getRecordedMetaKeyName(), "no") === "yes";
+	public function getOrderIsRecorded( int $orderId ): bool {
+		return $this->getPostMeta( $orderId, $this->namer->getRecordedMetaKeyName(), 'no' ) === 'yes';
 	}
 
 	/**
@@ -173,35 +178,35 @@ final class Api implements ApiInterface {
 	 * @throws InvalidKeyNameSortException
 	 */
 	public function getProductsWithNoRecentUpdatedIndex(): array {
-		$args = [
-			"limit" => 10,
-			"orderby" => "ID",
-			"order" => "ASC",
-			"meta_query" => [
-				"relation" => "OR",
-				[
-					"key" => "merge-org-sort-last_index_update",
-					"value" => date("Y-m-d"),
-					"compare" => "<",
-					"type" => "DATE",
-				],
-				[
-					"key" => "merge-org-sort-last_index_update",
-					"value" => "",
-					"compare" => "NOT EXISTS",
-				],
-			],
-		];
+		$args = array(
+			'limit'      => 10,
+			'orderby'    => 'ID',
+			'order'      => 'ASC',
+			'meta_query' => array(
+				'relation' => 'OR',
+				array(
+					'key'     => 'merge-org-sort-last_index_update',
+					'value'   => date( 'Y-m-d' ),
+					'compare' => '<',
+					'type'    => 'DATE',
+				),
+				array(
+					'key'     => 'merge-org-sort-last_index_update',
+					'value'   => '',
+					'compare' => 'NOT EXISTS',
+				),
+			),
+		);
 
-		$query = new WC_Product_Query($args);
+		$query     = new WC_Product_Query( $args );
 		$products_ = $query->get_products();
-		$products = [];
+		$products  = array();
 
 		/**
 		 * @var WC_Product $product
 		 */
-		foreach($products_ as $product) {
-			$products[] = $this->getProduct($product->get_id());
+		foreach ( $products_ as $product ) {
+			$products[] = $this->getProduct( $product->get_id() );
 		}
 
 		return $products;

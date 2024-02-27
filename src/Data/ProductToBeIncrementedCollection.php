@@ -13,7 +13,7 @@ final class ProductToBeIncrementedCollection {
 	/**
 	 * @param AbstractProductToBeIncremented[] $collection
 	 */
-	public function __construct(array $collection = []) {
+	public function __construct( array $collection = array() ) {
 		$this->collection = $collection;
 	}
 
@@ -28,7 +28,7 @@ final class ProductToBeIncrementedCollection {
 	 * @param AbstractProductToBeIncremented $productToBeIncremented
 	 * @return void
 	 */
-	public function addProductToBeIncremented(AbstractProductToBeIncremented $productToBeIncremented): void {
+	public function addProductToBeIncremented( AbstractProductToBeIncremented $productToBeIncremented ): void {
 		$this->collection[] = $productToBeIncremented;
 	}
 }

@@ -15,29 +15,29 @@ final class Cache implements CacheInterface {
 	 * @param string $key
 	 * @return mixed|null
 	 */
-	public function get(string $key) {
-		if(!function_exists("wp_cache_get")) {
-			return NULL;
+	public function get( string $key ) {
+		if ( ! function_exists( 'wp_cache_get' ) ) {
+			return null;
 		}
 
-		$data = wp_cache_get($key);
+		$data = wp_cache_get( $key );
 
-		return $data ? unserialize(base64_decode($data)) : NULL;
+		return $data ? unserialize( base64_decode( $data ) ) : null;
 	}
 
 	/**
 	 * @param string $key
-	 * @param mixed $data
-	 * @param int $ttl
+	 * @param mixed  $data
+	 * @param int    $ttl
 	 * @return bool
 	 */
-	public function set(string $key, $data, int $ttl = 0): bool {
-		if(!function_exists("wp_cache_set")) {
-			return FALSE;
+	public function set( string $key, $data, int $ttl = 0 ): bool {
+		if ( ! function_exists( 'wp_cache_set' ) ) {
+			return false;
 		}
 
-		$data = base64_encode(serialize($data));
+		$data = base64_encode( serialize( $data ) );
 
-		return wp_cache_set($key, $data, "", $ttl);
+		return wp_cache_set( $key, $data, '', $ttl );
 	}
 }

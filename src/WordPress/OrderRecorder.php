@@ -38,18 +38,20 @@ final class OrderRecorder {
 
 	/**
 	 * @param ProductToBeIncrementedCollectionGenerator $productToBeIncrementedCollectionGenerator
-	 * @param ApiInterface $api
-	 * @param Namer $namer
-	 * @param ProductRepository $productRepository
+	 * @param ApiInterface                              $api
+	 * @param Namer                                     $namer
+	 * @param ProductRepository                         $productRepository
 	 */
-	public function __construct(ProductToBeIncrementedCollectionGenerator $productToBeIncrementedCollectionGenerator,
+	public function __construct(
+		ProductToBeIncrementedCollectionGenerator $productToBeIncrementedCollectionGenerator,
 		ApiInterface $api,
 		Namer $namer,
-		ProductRepository $productRepository) {
+		ProductRepository $productRepository
+	) {
 		$this->productToBeIncrementedCollectionGenerator = $productToBeIncrementedCollectionGenerator;
-		$this->api = $api;
-		$this->namer = $namer;
-		$this->productRepository = $productRepository;
+		$this->api                                       = $api;
+		$this->namer                                     = $namer;
+		$this->productRepository                         = $productRepository;
 	}
 
 	/**
@@ -57,19 +59,21 @@ final class OrderRecorder {
 	 * @return void
 	 * @throws InvalidKeyNameSortException
 	 */
-	public function record(int $orderId): void {
-		$productToBeIncrementedCollection = $this->productToBeIncrementedCollectionGenerator->generate($orderId);
+	public function record( int $orderId ): void {
+		$productToBeIncrementedCollection = $this->productToBeIncrementedCollectionGenerator->generate( $orderId );
 
-		foreach($productToBeIncrementedCollection->getCollection() as $productToBeIncremented) {
+		foreach ( $productToBeIncrementedCollection->getCollection() as $productToBeIncremented ) {
 			// TODO SPECIFIC PRODUCT METHOD
-			$this->api->updatePostMeta($productToBeIncremented->getId(),
+			$this->api->updatePostMeta(
+				$productToBeIncremented->getId(),
 				$this->namer->getSalesMetaKeyName(),
-				$productToBeIncremented->getSalesToBeUpdated());
+				$productToBeIncremented->getSalesToBeUpdated()
+			);
 
-			$this->productRepository->getProduct($productToBeIncremented->getId());
+			$this->productRepository->getProduct( $productToBeIncremented->getId() );
 		}
 
 		// TODO SPECIFIC ORDER METHOD
-		$this->api->updatePostMeta($orderId, $this->namer->getRecordedMetaKeyName(), "yes");
+		$this->api->updatePostMeta( $orderId, $this->namer->getRecordedMetaKeyName(), 'yes' );
 	}
 }

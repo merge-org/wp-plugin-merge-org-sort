@@ -26,16 +26,16 @@ final class Order {
 	private bool $recorded;
 
 	/**
-	 * @param int $id
-	 * @param string $date
+	 * @param int        $id
+	 * @param string     $date
 	 * @param LineItem[] $lineItems
-	 * @param bool $recorded
+	 * @param bool       $recorded
 	 */
-	public function __construct(int $id, string $date, array $lineItems, bool $recorded) {
-		$this->id = $id;
-		$this->date = $date;
+	public function __construct( int $id, string $date, array $lineItems, bool $recorded ) {
+		$this->id        = $id;
+		$this->date      = $date;
 		$this->lineItems = $lineItems;
-		$this->recorded = $recorded;
+		$this->recorded  = $recorded;
 	}
 
 	/**

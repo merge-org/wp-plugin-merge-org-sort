@@ -27,9 +27,9 @@ final class SalesPeriod implements JsonSerializable {
 	 * @param int $sales
 	 * @param int $quantityBasedSales
 	 */
-	public function __construct(int $periodInDays, int $sales, int $quantityBasedSales) {
-		$this->periodInDays = $periodInDays;
-		$this->sales = $sales;
+	public function __construct( int $periodInDays, int $sales, int $quantityBasedSales ) {
+		$this->periodInDays       = $periodInDays;
+		$this->sales              = $sales;
 		$this->quantityBasedSales = $quantityBasedSales;
 	}
 
@@ -37,11 +37,11 @@ final class SalesPeriod implements JsonSerializable {
 	 * @return array<string, int>
 	 */
 	public function jsonSerialize(): array {
-		return [
-			"periodInDays" => $this->getPeriodInDays(),
-			"sales" => $this->getSales(),
-			"quantityBasedSales" => $this->getQuantityBasedSales(),
-		];
+		return array(
+			'periodInDays'       => $this->getPeriodInDays(),
+			'sales'              => $this->getSales(),
+			'quantityBasedSales' => $this->getQuantityBasedSales(),
+		);
 	}
 
 	/**

@@ -27,13 +27,13 @@ final class Logger {
 	/**
 	 *
 	 */
-	public function __construct(Namer $namer) {
-		if(!function_exists("wc_get_logger") || !($logger = wc_get_logger())) {
+	public function __construct( Namer $namer ) {
+		if ( ! function_exists( 'wc_get_logger' ) || ! ( $logger = wc_get_logger() ) ) {
 			return;
 		}
 
 		$this->logger = $logger;
-		$this->namer = $namer;
+		$this->namer  = $namer;
 	}
 
 	/**
@@ -41,11 +41,11 @@ final class Logger {
 	 * @param string $message
 	 * @return void
 	 */
-	public function log(string $level, string $message): void {
-		if($this->logger ?? NULL) {
+	public function log( string $level, string $message ): void {
+		if ( $this->logger ?? null ) {
 			return;
 		}
 
-		$this->logger->log($level, $message, ["source" => $this->namer->getPluginName()]);
+		$this->logger->log( $level, $message, array( 'source' => $this->namer->getPluginName() ) );
 	}
 }

@@ -19,11 +19,11 @@ abstract class AbstractProduct {
 	protected array $sales;
 
 	/**
-	 * @param int $id
+	 * @param int                            $id
 	 * @param array<string, array<int, int>> $sales
 	 */
-	public function __construct(int $id, array $sales) {
-		$this->id = $id;
+	public function __construct( int $id, array $sales ) {
+		$this->id    = $id;
 		$this->sales = $sales;
 	}
 

@@ -21,13 +21,13 @@ abstract class AbstractProduct implements JsonSerializable {
 	protected array $salesPeriods;
 
 	/**
-	 * @param int $id
+	 * @param int           $id
 	 * @param SalesPeriod[] $salesPeriods
 	 */
-	public function __construct(int $id, array $salesPeriods) {
+	public function __construct( int $id, array $salesPeriods ) {
 		$this->id = $id;
-		foreach($salesPeriods as $salesPeriod) {
-			$this->addSalesPeriod($salesPeriod);
+		foreach ( $salesPeriods as $salesPeriod ) {
+			$this->addSalesPeriod( $salesPeriod );
 		}
 	}
 
@@ -35,19 +35,19 @@ abstract class AbstractProduct implements JsonSerializable {
 	 * @param SalesPeriod $salesPeriod
 	 * @return void
 	 */
-	public function addSalesPeriod(SalesPeriod $salesPeriod) {
-		$this->salesPeriods[$salesPeriod->getPeriodInDays()] = $salesPeriod;
+	public function addSalesPeriod( SalesPeriod $salesPeriod ) {
+		$this->salesPeriods[ $salesPeriod->getPeriodInDays() ] = $salesPeriod;
 	}
 
 	/**
 	 * @return array<string, int|string|array<SalesPeriod>>
 	 */
 	public function jsonSerialize(): array {
-		return [
-			"id" => $this->getId(),
-			"type" => $this->getType(),
-			"salesPeriods" => $this->getSalesPeriods(),
-		];
+		return array(
+			'id'           => $this->getId(),
+			'type'         => $this->getType(),
+			'salesPeriods' => $this->getSalesPeriods(),
+		);
 	}
 
 	/**

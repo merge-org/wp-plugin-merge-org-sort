@@ -34,19 +34,21 @@ final class ProductRepository {
 	private Namer $namer;
 
 	/**
-	 * @param ApiInterface $api
+	 * @param ApiInterface       $api
 	 * @param SalesPeriodManager $salesPeriodManager
-	 * @param CacheInterface $cache
-	 * @param Namer $namer
+	 * @param CacheInterface     $cache
+	 * @param Namer              $namer
 	 */
-	public function __construct(ApiInterface $api,
+	public function __construct(
+		ApiInterface $api,
 		SalesPeriodManager $salesPeriodManager,
 		CacheInterface $cache,
-		Namer $namer) {
-		$this->api = $api;
+		Namer $namer
+	) {
+		$this->api                = $api;
 		$this->salesPeriodManager = $salesPeriodManager;
-		$this->cache = $cache;
-		$this->namer = $namer;
+		$this->cache              = $cache;
+		$this->namer              = $namer;
 	}
 
 	/**
@@ -54,39 +56,41 @@ final class ProductRepository {
 	 * @return AbstractProduct|null
 	 * @throws InvalidKeyNameSortException
 	 */
-	public function getProduct(int $productId): ?AbstractProduct {
-		$cacheKey = $this->namer->getProductCacheKey($productId);
-		if($product = $this->cache->get($cacheKey)) {
+	public function getProduct( int $productId ): ?AbstractProduct {
+		$cacheKey = $this->namer->getProductCacheKey( $productId );
+		if ( $product = $this->cache->get( $cacheKey ) ) {
 			// @codeCoverageIgnoreStart
 			return $product;
 			// @codeCoverageIgnoreEnd
 		}
 
-		$wordPressProduct = $this->api->getProduct($productId);
-		if(!$wordPressProduct) {
-			return NULL;
+		$wordPressProduct = $this->api->getProduct( $productId );
+		if ( ! $wordPressProduct ) {
+			return null;
 		}
 
-		$salesPeriods = $this->salesPeriodManager->getAllSalesPeriods($wordPressProduct->getSales());
+		$salesPeriods = $this->salesPeriodManager->getAllSalesPeriods( $wordPressProduct->getSales() );
 
-		$product = NULL;
-		if($wordPressProduct->getType() === Constants::POST_TYPE_PRODUCT) {
+		$product = null;
+		if ( $wordPressProduct->getType() === Constants::POST_TYPE_PRODUCT ) {
 			/**
 			 * @var \MergeOrg\Sort\Data\WordPress\Product $wordPressProduct
 			 */
-			$product = new Product($wordPressProduct->getId(),
+			$product = new Product(
+				$wordPressProduct->getId(),
 				$salesPeriods,
 				$wordPressProduct->isExcludedFromSorting(),
 				$wordPressProduct->getPreviousMenuOrder(),
-				$wordPressProduct->getLastIndexUpdate());
+				$wordPressProduct->getLastIndexUpdate()
+			);
 		} else {
 			/**
 			 * @var \MergeOrg\Sort\Data\WordPress\ProductVariation $wordPressProduct
 			 */
-			$product = new ProductVariation($wordPressProduct->getId(), $salesPeriods);
+			$product = new ProductVariation( $wordPressProduct->getId(), $salesPeriods );
 		}
 
-		$this->cache->set($cacheKey, $product);
+		$this->cache->set( $cacheKey, $product );
 
 		return $product;
 	}
