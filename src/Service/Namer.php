@@ -80,6 +80,14 @@ final class Namer {
 	 * @return string
 	 * @throws InvalidKeyNameSortException
 	 */
+	public function getServerLoadCacheKey(): string {
+		return "{$this->getPluginName()}-{$this->getKeyNameFromConstants("server_load_cache")}";
+	}
+
+	/**
+	 * @return string
+	 * @throws InvalidKeyNameSortException
+	 */
 	public function getLastIndexUpdateMetaKeyName(): string {
 		return "{$this->getPluginName()}-{$this->getKeyNameFromConstants("last_index_update")}";
 	}

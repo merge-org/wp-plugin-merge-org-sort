@@ -72,7 +72,7 @@ final class Api implements ApiInterface {
 		}
 
 		$sales = $this->getPostMeta( $productId, $this->namer->getSalesMetaKeyName(), array() );
-		if ( $product->get_parent_id() ) {
+		if ( ! $product->get_parent_id() ) {
 			return new Product(
 				$product->get_id(),
 				$sales,

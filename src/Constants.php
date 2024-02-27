@@ -61,6 +61,11 @@ final class Constants {
 	public const KEY_PRODUCT_CACHE = 'product_cache';
 
 	/**
+	 *
+	 */
+	public const KEY_SERVER_LOAD_CACHE = 'server_load_cache';
+
+	/**
 	 * TODO CHECK IF THIS NEEDS TO BE HERE OR HARD CODE IT
 	 */
 	public const SALES_PERIODS = array(

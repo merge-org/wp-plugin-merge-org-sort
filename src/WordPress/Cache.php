@@ -20,7 +20,7 @@ final class Cache implements CacheInterface {
 			return null;
 		}
 
-		$data = wp_cache_get( $key );
+		$data = wp_cache_get( $key, 'merge-org-sort' );
 
 		return $data ? unserialize( base64_decode( $data ) ) : null;
 	}
@@ -38,6 +38,6 @@ final class Cache implements CacheInterface {
 
 		$data = base64_encode( serialize( $data ) );
 
-		return wp_cache_set( $key, $data, '', $ttl );
+		return wp_cache_set( $key, $data, 'merge-org-sort', $ttl );
 	}
 }

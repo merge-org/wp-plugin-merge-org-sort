@@ -43,6 +43,29 @@ final class Product extends AbstractProduct {
 	}
 
 	/**
+	 * @return string
+	 */
+	function getType(): string {
+		return Constants::POST_TYPE_PRODUCT;
+	}
+
+	/**
+	 * @return array<string, int|string|array<int, string>|bool|int>
+	 */
+	public function jsonSerialize(): array {
+		$parentJson = parent::jsonSerialize();
+
+		return array_merge(
+			$parentJson,
+			array(
+				'excludedFromSorting' => $this->isExcludedFromSorting(),
+				'previousMenuOrder'   => $this->getPreviousMenuOrder(),
+				'lastIndexUpdate'     => $this->getLastIndexUpdate(),
+			)
+		);
+	}
+
+	/**
 	 * @return bool
 	 */
 	public function isExcludedFromSorting(): bool {
@@ -54,13 +77,6 @@ final class Product extends AbstractProduct {
 	 */
 	public function getPreviousMenuOrder(): int {
 		return $this->previousMenuOrder;
-	}
-
-	/**
-	 * @return string
-	 */
-	function getType(): string {
-		return Constants::POST_TYPE_PRODUCT;
 	}
 
 	/**
