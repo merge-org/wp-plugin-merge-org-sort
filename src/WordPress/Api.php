@@ -45,24 +45,15 @@ final class Api implements ApiInterface {
 			return false;
 		}
 
-		// TODO THIS HAS TO BE SEPARATE METHODS
-		// TODO `UPDATE_ORDER_META`, `UPDATE_PRODUCT_META` ETC
 		if ( $this->getProduct( $postId ) ) {
-			// Cache busting
-			$product = wc_get_product( $postId );
-			$product->update_meta_data( $metaKey, $value );
-			$product->save();
-			$update = true;
-		} elseif ( $this->getOrder( $postId ) ) {
-			$order = wc_get_order( $postId );
-			$order->update_meta_data( $metaKey, $value );
-			$order->save();
-			$update = true;
-		} else {
-			$update = (bool) update_post_meta( $postId, $metaKey, $value );
+			return $this->updateProductMeta( $postId, $metaKey, $value );
 		}
 
-		return $update;
+		if ( $this->getOrder( $postId ) ) {
+			return $this->updateOrderMeta( $postId, $metaKey, $value );
+		}
+
+		return (bool) update_post_meta( $postId, $metaKey, $value );
 	}
 
 	/**
@@ -132,6 +123,18 @@ final class Api implements ApiInterface {
 	}
 
 	/**
+	 * @param int    $postId
+	 * @param string $metaKey
+	 * @param mixed  $value
+	 * @return bool
+	 */
+	public function updateProductMeta( int $postId, string $metaKey, $value ): bool {
+		$product = wc_get_product( $postId );
+		$product->update_meta_data( $metaKey, $value );
+		return (bool) $product->save();
+	}
+
+	/**
 	 * @param int $orderId
 	 * @return Order|null
 	 * @throws InvalidKeyNameSortException
@@ -171,6 +174,19 @@ final class Api implements ApiInterface {
 	 */
 	public function getOrderIsRecorded( int $orderId ): bool {
 		return $this->getPostMeta( $orderId, $this->namer->getRecordedMetaKeyName(), 'no' ) === 'yes';
+	}
+
+	/**
+	 * @param int    $postId
+	 * @param string $metaKey
+	 * @param mixed  $value
+	 * @return bool
+	 */
+	public function updateOrderMeta( int $postId, string $metaKey, $value ): bool {
+		$order = wc_get_order( $postId );
+		$order->update_meta_data( $metaKey, $value );
+
+		return (bool) $order->save();
 	}
 
 	/**
