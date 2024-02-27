@@ -10,7 +10,7 @@ final class ProductVariation extends AbstractProduct {
 	/**
 	 * @return string
 	 */
-	function getType(): string {
+	public function getType(): string {
 		return Constants::POST_TYPE_PRODUCT_VARIATION;
 	}
 }

@@ -40,4 +40,16 @@ final class Cache implements CacheInterface {
 
 		return wp_cache_set( $key, $data, 'merge-org-sort', $ttl );
 	}
+
+	/**
+	 * @param string $key
+	 * @return bool
+	 */
+	public function delete( string $key ): bool {
+		if ( ! function_exists( 'wp_cache_delete' ) ) {
+			return false;
+		}
+
+		return wp_cache_delete( $key, 'merge-org-sort' );
+	}
 }

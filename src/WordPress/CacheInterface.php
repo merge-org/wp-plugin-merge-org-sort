@@ -18,4 +18,10 @@ interface CacheInterface {
 	 * @return bool
 	 */
 	public function set( string $key, $data, int $ttl = 0 ): bool;
+
+	/**
+	 * @param string $key
+	 * @return bool
+	 */
+	public function delete( string $key ): bool;
 }

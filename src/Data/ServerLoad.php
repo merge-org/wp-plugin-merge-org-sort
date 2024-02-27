@@ -28,6 +28,7 @@ final class ServerLoad implements JsonSerializable {
 
 	/**
 	 * @return array<string, float>
+	 * @codeCoverageIgnore
 	 */
 	public function jsonSerialize(): array {
 		return array(
@@ -38,6 +39,7 @@ final class ServerLoad implements JsonSerializable {
 
 	/**
 	 * @return float
+	 * @codeCoverageIgnore
 	 */
 	public function getCpuLoad(): float {
 		return $this->cpuLoad;

@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace MergeOrg\Sort\Data;
 
 use MergeOrg\Sort\Constants;
+use MergeOrg\Sort\Service\Namer;
+use MergeOrg\Sort\Exception\InvalidKeyNameSortException;
 
 final class Product extends AbstractProduct {
 
@@ -44,6 +46,7 @@ final class Product extends AbstractProduct {
 
 	/**
 	 * @return array<string, int|string|array<SalesPeriod>|bool|int>
+	 * @throws InvalidKeyNameSortException
 	 */
 	public function jsonSerialize(): array {
 		$parentJson = parent::jsonSerialize();
@@ -54,6 +57,7 @@ final class Product extends AbstractProduct {
 				'excludedFromSorting' => $this->isExcludedFromSorting(),
 				'previousMenuOrder'   => $this->getPreviousMenuOrder(),
 				'lastIndexUpdate'     => $this->getLastIndexUpdate(),
+				'indexesMetaKeys'     => $this->getIndexesMetaKeys( new Namer() ),
 			)
 		);
 	}
@@ -80,9 +84,23 @@ final class Product extends AbstractProduct {
 	}
 
 	/**
+	 * @param Namer $namer
+	 * @return array<string, int>
+	 * @throws InvalidKeyNameSortException
+	 */
+	public function getIndexesMetaKeys( Namer $namer ) {
+		$indexes = array();
+		foreach ( $this->getSalesPeriods() as $salesPeriod ) {
+			$indexes[ $namer->getPeriodInDaysMetaKeyName( $salesPeriod->getPeriodInDays() ) ] = $salesPeriod->getSales();
+		}
+
+		return $indexes;
+	}
+
+	/**
 	 * @return string
 	 */
-	function getType(): string {
+	public function getType(): string {
 		return Constants::POST_TYPE_PRODUCT;
 	}
 }

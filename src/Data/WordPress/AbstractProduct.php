@@ -3,12 +3,10 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort\Data\WordPress;
 
-use JsonSerializable;
-
 /**
  * @internal
  */
-abstract class AbstractProduct implements JsonSerializable {
+abstract class AbstractProduct {
 
 	/**
 	 * @var int
@@ -27,17 +25,6 @@ abstract class AbstractProduct implements JsonSerializable {
 	public function __construct( int $id, array $sales ) {
 		$this->id    = $id;
 		$this->sales = $sales;
-	}
-
-	/**
-	 * @return array<string, int|string|array<int, string>>
-	 */
-	public function jsonSerialize(): array {
-		return array(
-			'id'    => $this->getId(),
-			'type'  => $this->getType(),
-			'sales' => $this->getSales(),
-		);
 	}
 
 	/**

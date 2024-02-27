@@ -8,7 +8,10 @@ use MergeOrg\Sort\Exception\SortException;
 use MergeOrg\Sort\Service\SalesIncrementer;
 use MergeOrg\Sort\Service\ProductRepository;
 use MergeOrg\Sort\Service\SalesPeriodManager;
+use MergeOrg\Sort\Service\ServerLoadCalculator;
+use MergeOrg\Sort\Service\OptimalPostCountFinder;
 use MergeOrg\Sort\Exception\InvalidKeyNameSortException;
+use MergeOrg\Sort\Service\ServerLoadCalculatorInterface;
 use MergeOrg\Sort\Service\ProductToBeIncrementedCollectionGenerator;
 
 /**
@@ -110,18 +113,22 @@ final class ActionsRegistrar {
 	 */
 	private function get( string $key ) {
 		if ( ! $this->got ) {
-			$this->definitions[ Namer::class ]              = $namer = new Namer();
-			$this->definitions[ Logger::class ]             = new Logger( $namer );
-			$this->definitions[ Cache::class ]              = $cache = new Cache();
-			$this->definitions[ ApiInterface::class ]       = $api = new Api( $namer );
-			$this->definitions[ SalesPeriodManager::class ] = $salesPeriodManager = new SalesPeriodManager( $namer );
-			$this->definitions[ ProductRepository::class ]  =
-			$productRepository                              = new ProductRepository( $api, $salesPeriodManager, $cache, $namer );
-			$this->definitions[ SalesIncrementer::class ]   = $salesIncrementer = new SalesIncrementer();
+			$this->definitions[ Namer::class ]                         = $namer = new Namer();
+			$this->definitions[ Logger::class ]                        = new Logger( $namer );
+			$this->definitions[ Cache::class ]                         = $cache = new Cache();
+			$this->definitions[ ServerLoadCalculatorInterface::class ] =
+			$serverLoadCalculator                                      = new ServerLoadCalculator( $cache, $namer );
+			$this->definitions[ OptimalPostCountFinder::class ]        =
+			$optimalPostsCountFinder                                   = new OptimalPostCountFinder( $serverLoadCalculator );
+			$this->definitions[ ApiInterface::class ]                  = $api = new Api( $namer, $optimalPostsCountFinder );
+			$this->definitions[ SalesPeriodManager::class ]            = $salesPeriodManager = new SalesPeriodManager( $namer );
+			$this->definitions[ ProductRepository::class ]             =
+			$productRepository                            = new ProductRepository( $api, $salesPeriodManager, $cache, $namer );
+			$this->definitions[ SalesIncrementer::class ] = $salesIncrementer = new SalesIncrementer();
 			$this->definitions[ ProductToBeIncrementedCollectionGenerator::class ] =
 			$productToBeIncrementedCollectionGenerator                             = new ProductToBeIncrementedCollectionGenerator( $api, $salesIncrementer );
 			$this->definitions[ OrderRecorder::class ]                             =
-				new OrderRecorder( $productToBeIncrementedCollectionGenerator, $api, $namer, $productRepository );
+				new OrderRecorder( $productToBeIncrementedCollectionGenerator, $productRepository );
 			$this->got = true;
 		}
 

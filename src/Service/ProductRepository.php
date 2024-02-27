@@ -52,6 +52,20 @@ final class ProductRepository {
 	}
 
 	/**
+	 * @return AbstractProduct[]
+	 * @throws InvalidKeyNameSortException
+	 */
+	public function getProductsWithNoRecentUpdatedIndex(): array {
+		$products_ = $this->api->getProductsWithNoRecentUpdatedIndex();
+		$products  = array();
+		foreach ( $products_ as $product ) {
+			$products[] = $this->getProduct( $product->getId() );
+		}
+
+		return $products;
+	}
+
+	/**
 	 * @param int $productId
 	 * @return AbstractProduct|null
 	 * @throws InvalidKeyNameSortException
@@ -93,5 +107,34 @@ final class ProductRepository {
 		$this->cache->set( $cacheKey, $product );
 
 		return $product;
+	}
+
+	/**
+	 * @param int                            $productId
+	 * @param array<string, array<int, int>> $sales
+	 * @return bool
+	 * @throws InvalidKeyNameSortException
+	 * @codeCoverageIgnore
+	 */
+	public function setProductSales( int $productId, array $sales ): bool {
+		$cacheKey = $this->namer->getProductCacheKey( $productId );
+		$this->cache->delete( $cacheKey );
+
+		$result = $this->api->updateProductMeta( $productId, $this->namer->getSalesMetaKeyName(), $sales );
+
+		// Place back in cache
+		$this->getProduct( $productId );
+
+		return $result;
+	}
+
+	/**
+	 * @param int $orderId
+	 * @return bool
+	 * @throws InvalidKeyNameSortException
+	 * @codeCoverageIgnore
+	 */
+	public function setOrderRecorded( int $orderId ): bool {
+		return $this->api->updateOrderMeta( $orderId, $this->namer->getRecordedMetaKeyName(), 'yes' );
 	}
 }

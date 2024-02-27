@@ -10,6 +10,7 @@ use MergeOrg\Sort\Data\WordPress\Order;
 use MergeOrg\Sort\Data\WordPress\Product;
 use MergeOrg\Sort\Data\WordPress\LineItem;
 use MergeOrg\Sort\Data\WordPress\AbstractProduct;
+use MergeOrg\Sort\Service\OptimalPostCountFinder;
 use MergeOrg\Sort\Data\WordPress\ProductVariation;
 use MergeOrg\Sort\Exception\InvalidKeyNameSortException;
 
@@ -27,10 +28,17 @@ final class Api implements ApiInterface {
 	private Namer $namer;
 
 	/**
-	 * @param Namer $namer
+	 * @var OptimalPostCountFinder
 	 */
-	public function __construct( Namer $namer ) {
-		$this->namer = $namer;
+	private OptimalPostCountFinder $optimalPostsCountFinder;
+
+	/**
+	 * @param Namer                  $namer
+	 * @param OptimalPostCountFinder $optimalPostsCountFinder
+	 */
+	public function __construct( Namer $namer, OptimalPostCountFinder $optimalPostsCountFinder ) {
+		$this->namer                   = $namer;
+		$this->optimalPostsCountFinder = $optimalPostsCountFinder;
 	}
 
 	/**
@@ -131,6 +139,7 @@ final class Api implements ApiInterface {
 	public function updateProductMeta( int $postId, string $metaKey, $value ): bool {
 		$product = wc_get_product( $postId );
 		$product->update_meta_data( $metaKey, $value );
+
 		return (bool) $product->save();
 	}
 
@@ -195,7 +204,7 @@ final class Api implements ApiInterface {
 	 */
 	public function getProductsWithNoRecentUpdatedIndex(): array {
 		$args = array(
-			'limit'      => 10,
+			'limit'      => $this->optimalPostsCountFinder->getOptimalPostsCount(),
 			'orderby'    => 'ID',
 			'order'      => 'ASC',
 			'meta_query' => array(
