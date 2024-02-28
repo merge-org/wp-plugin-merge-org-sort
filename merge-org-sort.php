@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Description: 📊Sort - Sales Order Ranking Tool | Powered by Merge
  * Author: Merge
  * Author URI: https://github.com/merge-org
- * Version: 1.0.49
+ * Version: 1.0.50
  * Text Domain: merge-org-sort
  * Domain Path: /languages
  * Requires PHP: 7.4
