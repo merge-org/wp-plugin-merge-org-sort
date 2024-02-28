@@ -1,0 +1,22 @@
+{
+    "name": "merge-org\/wp-plugin-merge-org-sort",
+    "authors": [
+        {
+            "name": "Christos Athanasiadis",
+            "email": "chris.k.athanasiadis@gmail.com"
+        }
+    ],
+    "description": "",
+    "require": {
+        "php": "^7.4||^8",
+        "ext-json": "*",
+        "ext-curl": "*",
+        "ext-redis": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "MergeOrg\\Sort\\": "src"
+        }
+    },
+    "version": "1.0.49"
+}
