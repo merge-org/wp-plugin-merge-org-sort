@@ -5,7 +5,7 @@ namespace MergeOrg\Sort\WordPress;
 
 use MergeOrg\Sort\Data\WordPress\Order;
 use MergeOrg\Sort\Data\WordPress\AbstractProduct;
-use MergeOrg\Sort\Exception\InvalidKeyNameSortException;
+use MergeOrg\Sort\Exception\InvalidKeyNameException;
 
 interface ApiInterface {
 
@@ -43,7 +43,7 @@ interface ApiInterface {
 
 	/**
 	 * @return AbstractProduct[]
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 */
 	public function getProductsWithNoRecentUpdatedIndex(): array;
 
@@ -70,4 +70,9 @@ interface ApiInterface {
 	 * @return bool
 	 */
 	public function updateOrderMeta( int $postId, string $metaKey, $value ): bool;
+
+	/**
+	 * @return Order[]
+	 */
+	public function getOrdersNotRecorded(): array;
 }

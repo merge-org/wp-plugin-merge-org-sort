@@ -1,9 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace MergeOrg\Sort\Data\WordPress;
+namespace MergeOrg\Sort\Data;
 
-final class Order {
+use JsonSerializable;
+
+/**
+ * Class Order
+ *
+ * @package MergeOrg\Sort\Data
+ */
+final class Order implements JsonSerializable {
 
 	/**
 	 * @var int
@@ -32,17 +39,30 @@ final class Order {
 
 	/**
 	 * @param int        $id
-	 * @param string     $status
 	 * @param string     $date
+	 * @param string     $status
 	 * @param LineItem[] $lineItems
 	 * @param bool       $recorded
 	 */
-	public function __construct( int $id, string $status, string $date, array $lineItems, bool $recorded ) {
+	public function __construct( int $id, string $date, string $status, array $lineItems, bool $recorded ) {
 		$this->id        = $id;
 		$this->date      = $date;
 		$this->status    = $status;
 		$this->lineItems = $lineItems;
 		$this->recorded  = $recorded;
+	}
+
+	/**
+	 * @return array<string, int|bool>
+	 */
+	public function jsonSerialize(): array {
+		return array(
+			'id'        => $this->getId(),
+			'date'      => $this->getDate(),
+			'status'    => $this->getStatus(),
+			'lineItems' => $this->getLineItems(),
+			'recorded'  => $this->isRecorded(),
+		);
 	}
 
 	/**

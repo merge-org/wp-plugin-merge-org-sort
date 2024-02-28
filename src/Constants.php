@@ -63,6 +63,11 @@ final class Constants {
 	/**
 	 *
 	 */
+	public const KEY_ORDER_CACHE = 'order_cache';
+
+	/**
+	 *
+	 */
 	public const KEY_SERVER_LOAD_CACHE = 'server_load_cache';
 
 	/**

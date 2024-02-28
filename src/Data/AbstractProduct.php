@@ -16,16 +16,23 @@ abstract class AbstractProduct implements JsonSerializable {
 	protected int $id;
 
 	/**
+	 * @var array<string, array<int,int>>
+	 */
+	protected array $sales;
+
+	/**
 	 * @var SalesPeriod[]
 	 */
 	protected array $salesPeriods;
 
 	/**
-	 * @param int           $id
-	 * @param SalesPeriod[] $salesPeriods
+	 * @param int                           $id
+	 * @param array<string, array<int,int>> $sales
+	 * @param SalesPeriod[]                 $salesPeriods
 	 */
-	public function __construct( int $id, array $salesPeriods ) {
-		$this->id = $id;
+	public function __construct( int $id, array $sales, array $salesPeriods ) {
+		$this->id    = $id;
+		$this->sales = $sales;
 		foreach ( $salesPeriods as $salesPeriod ) {
 			$this->addSalesPeriod( $salesPeriod );
 		}
@@ -40,12 +47,13 @@ abstract class AbstractProduct implements JsonSerializable {
 	}
 
 	/**
-	 * @return array<string, int|string|array<SalesPeriod>>
+	 * @return array<string, int|string|array<SalesPeriod>|array<string, array<int,int>>>
 	 */
 	public function jsonSerialize(): array {
 		return array(
 			'id'           => $this->getId(),
 			'type'         => $this->getType(),
+			'sales'        => $this->getSales(),
 			'salesPeriods' => $this->getSalesPeriods(),
 		);
 	}
@@ -61,6 +69,13 @@ abstract class AbstractProduct implements JsonSerializable {
 	 * @return string
 	 */
 	abstract function getType(): string;
+
+	/**
+	 * @return array<string, array<int,int>>
+	 */
+	public function getSales(): array {
+		return $this->sales;
+	}
 
 	/**
 	 * @return SalesPeriod[]

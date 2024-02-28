@@ -9,7 +9,7 @@ use MergeOrg\Sort\Data\AbstractProduct;
 use MergeOrg\Sort\Data\ProductVariation;
 use MergeOrg\Sort\WordPress\ApiInterface;
 use MergeOrg\Sort\WordPress\CacheInterface;
-use MergeOrg\Sort\Exception\InvalidKeyNameSortException;
+use MergeOrg\Sort\Exception\InvalidKeyNameException;
 
 final class ProductRepository {
 
@@ -53,7 +53,39 @@ final class ProductRepository {
 
 	/**
 	 * @return AbstractProduct[]
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
+	 * @codeCoverageIgnore
+	 */
+	public function setProductsIndexes(): array {
+		$updatedProducts = array();
+
+		/**
+		 * @var Product $product
+		 */
+		foreach ( $this->getProductsWithNoRecentUpdatedIndex() as $product ) {
+			$cacheKey = $this->namer->getProductCacheKey( $product->getId() );
+			$this->cache->delete( $cacheKey );
+
+			foreach ( $product->getIndexesMetaKeys( $this->namer ) as $indexMetaKey => $sales ) {
+				$this->api->updateProductMeta( $product->getId(), $indexMetaKey, $sales );
+			}
+
+			$this->api->updateProductMeta(
+				$product->getId(),
+				$this->namer->getLastIndexUpdateMetaKeyName(),
+				date( 'Y-m-d H:i:s' )
+			);
+
+			// Place back in cache
+			$updatedProducts[] = $this->getProduct( $product->getId() );
+		}
+
+		return $updatedProducts;
+	}
+
+	/**
+	 * @return AbstractProduct[]
+	 * @throws InvalidKeyNameException
 	 */
 	public function getProductsWithNoRecentUpdatedIndex(): array {
 		$products_ = $this->api->getProductsWithNoRecentUpdatedIndex();
@@ -68,7 +100,7 @@ final class ProductRepository {
 	/**
 	 * @param int $productId
 	 * @return AbstractProduct|null
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 */
 	public function getProduct( int $productId ): ?AbstractProduct {
 		$cacheKey = $this->namer->getProductCacheKey( $productId );
@@ -92,6 +124,7 @@ final class ProductRepository {
 			 */
 			$product = new Product(
 				$wordPressProduct->getId(),
+				$wordPressProduct->getSales(),
 				$salesPeriods,
 				$wordPressProduct->isExcludedFromSorting(),
 				$wordPressProduct->getPreviousMenuOrder(),
@@ -101,7 +134,7 @@ final class ProductRepository {
 			/**
 			 * @var \MergeOrg\Sort\Data\WordPress\ProductVariation $wordPressProduct
 			 */
-			$product = new ProductVariation( $wordPressProduct->getId(), $salesPeriods );
+			$product = new ProductVariation( $wordPressProduct->getId(), $wordPressProduct->getSales(), $salesPeriods );
 		}
 
 		$this->cache->set( $cacheKey, $product );
@@ -113,7 +146,7 @@ final class ProductRepository {
 	 * @param int                            $productId
 	 * @param array<string, array<int, int>> $sales
 	 * @return bool
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 * @codeCoverageIgnore
 	 */
 	public function setProductSales( int $productId, array $sales ): bool {
@@ -126,15 +159,5 @@ final class ProductRepository {
 		$this->getProduct( $productId );
 
 		return $result;
-	}
-
-	/**
-	 * @param int $orderId
-	 * @return bool
-	 * @throws InvalidKeyNameSortException
-	 * @codeCoverageIgnore
-	 */
-	public function setOrderRecorded( int $orderId ): bool {
-		return $this->api->updateOrderMeta( $orderId, $this->namer->getRecordedMetaKeyName(), 'yes' );
 	}
 }

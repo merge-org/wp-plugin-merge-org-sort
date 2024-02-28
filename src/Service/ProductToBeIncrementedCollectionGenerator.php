@@ -3,17 +3,22 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort\Service;
 
-use MergeOrg\Sort\WordPress\ApiInterface;
 use MergeOrg\Sort\Data\ProductToBeIncremented;
+use MergeOrg\Sort\Exception\InvalidKeyNameException;
 use MergeOrg\Sort\Data\ProductVariationToBeIncremented;
 use MergeOrg\Sort\Data\ProductToBeIncrementedCollection;
 
 final class ProductToBeIncrementedCollectionGenerator {
 
 	/**
-	 * @var ApiInterface
+	 * @var OrderRepository
 	 */
-	private ApiInterface $api;
+	private OrderRepository $orderRepository;
+
+	/**
+	 * @var ProductRepository
+	 */
+	private ProductRepository $productRepository;
 
 	/**
 	 * @var SalesIncrementer
@@ -21,20 +26,27 @@ final class ProductToBeIncrementedCollectionGenerator {
 	private SalesIncrementer $salesIncrementer;
 
 	/**
-	 * @param ApiInterface     $api
-	 * @param SalesIncrementer $salesIncrementer
+	 * @param OrderRepository   $orderRepository
+	 * @param ProductRepository $productRepository
+	 * @param SalesIncrementer  $salesIncrementer
 	 */
-	public function __construct( ApiInterface $api, SalesIncrementer $salesIncrementer ) {
-		$this->api              = $api;
-		$this->salesIncrementer = $salesIncrementer;
+	public function __construct(
+		OrderRepository $orderRepository,
+		ProductRepository $productRepository,
+		SalesIncrementer $salesIncrementer
+	) {
+		$this->orderRepository   = $orderRepository;
+		$this->productRepository = $productRepository;
+		$this->salesIncrementer  = $salesIncrementer;
 	}
 
 	/**
 	 * @param int $orderId
 	 * @return ProductToBeIncrementedCollection|null
+	 * @throws InvalidKeyNameException
 	 */
 	public function generate( int $orderId ): ?ProductToBeIncrementedCollection {
-		$order = $this->api->getOrder( $orderId );
+		$order = $this->orderRepository->getOrder( $orderId );
 		if ( ! $order || ! $order->getId() || $order->isRecorded() ) {
 			return null;
 		}
@@ -45,7 +57,7 @@ final class ProductToBeIncrementedCollectionGenerator {
 				continue;
 			}
 
-			$product = $this->api->getProduct( $lineItem->getProductId() );
+			$product = $this->productRepository->getProduct( $lineItem->getProductId() );
 			if ( ! $product ) {
 				continue;
 			}
@@ -60,7 +72,7 @@ final class ProductToBeIncrementedCollectionGenerator {
 			);
 
 			if ( $lineItem->getVariationId() ) {
-				$variation = $this->api->getProduct( $lineItem->getVariationId() );
+				$variation = $this->productRepository->getProduct( $lineItem->getVariationId() );
 				if ( ! $variation ) {
 					continue;
 				}

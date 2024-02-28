@@ -5,7 +5,7 @@ namespace MergeOrg\Sort\Service;
 
 use MergeOrg\Sort\Data\ServerLoad;
 use MergeOrg\Sort\WordPress\CacheInterface;
-use MergeOrg\Sort\Exception\InvalidKeyNameSortException;
+use MergeOrg\Sort\Exception\InvalidKeyNameException;
 
 /**
  * Class ServerLoadCalculator
@@ -36,7 +36,7 @@ final class ServerLoadCalculator implements ServerLoadCalculatorInterface {
 
 	/**
 	 * @return ServerLoad
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 */
 	public function calculate(): ServerLoad {
 		$cacheKey = $this->namer->getServerLoadCacheKey();

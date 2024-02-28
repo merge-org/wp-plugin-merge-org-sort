@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort\WordPress;
 
-use WC_Product;
-use WC_Product_Query;
+use WP_Post;
+use WP_Query;
 use MergeOrg\Sort\Service\Namer;
 use MergeOrg\Sort\Data\WordPress\Order;
 use MergeOrg\Sort\Data\WordPress\Product;
@@ -12,7 +12,7 @@ use MergeOrg\Sort\Data\WordPress\LineItem;
 use MergeOrg\Sort\Data\WordPress\AbstractProduct;
 use MergeOrg\Sort\Service\OptimalPostCountFinder;
 use MergeOrg\Sort\Data\WordPress\ProductVariation;
-use MergeOrg\Sort\Exception\InvalidKeyNameSortException;
+use MergeOrg\Sort\Exception\InvalidKeyNameException;
 
 /**
  * Class Api
@@ -46,7 +46,7 @@ final class Api implements ApiInterface {
 	 * @param string $metaKey
 	 * @param mixed  $value
 	 * @return bool
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 */
 	public function updatePostMeta( int $postId, string $metaKey, $value ): bool {
 		if ( ! function_exists( 'update_post_meta' ) ) {
@@ -67,7 +67,7 @@ final class Api implements ApiInterface {
 	/**
 	 * @param int $productId
 	 * @return AbstractProduct|null
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 */
 	public function getProduct( int $productId ): ?AbstractProduct {
 		if ( ! function_exists( 'wc_get_product' ) ) {
@@ -110,21 +110,21 @@ final class Api implements ApiInterface {
 	/**
 	 * @param int $productId
 	 * @return bool
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 */
 	public function getProductIsExcludedFromSorting( int $productId ): bool {
 		return $this->getPostMeta( $productId, $this->namer->getExcludeFromSortingMetaKeyName(), 'no' ) === 'yes';
 	}
 
 	/**
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 */
 	public function getProductPreviousOrder( int $productId ): int {
 		return (int) $this->getPostMeta( $productId, $this->namer->getPreviousOrderMetaKeyName(), '-1' );
 	}
 
 	/**
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 */
 	public function getProductLastIndexUpdate( int $productId ): string {
 		return $this->getPostMeta( $productId, $this->namer->getLastIndexUpdateMetaKeyName(), '1970-01-01' );
@@ -146,7 +146,7 @@ final class Api implements ApiInterface {
 	/**
 	 * @param int $orderId
 	 * @return Order|null
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 */
 	public function getOrder( int $orderId ): ?Order {
 		if ( ! function_exists( 'wc_get_order' ) ) {
@@ -173,13 +173,14 @@ final class Api implements ApiInterface {
 		return new Order(
 			$order->get_id(),
 			$order->get_date_paid()->format( 'Y-m-d' ),
+			$order->get_status(),
 			$lineItems,
 			$this->getOrderIsRecorded( $order->get_id() )
 		);
 	}
 
 	/**
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 */
 	public function getOrderIsRecorded( int $orderId ): bool {
 		return $this->getPostMeta( $orderId, $this->namer->getRecordedMetaKeyName(), 'no' ) === 'yes';
@@ -199,39 +200,89 @@ final class Api implements ApiInterface {
 	}
 
 	/**
+	 * @return Order[]
+	 * @throws InvalidKeyNameException
+	 */
+	public function getOrdersNotRecorded(): array {
+		$statuses = array_diff(
+			array_keys( wc_get_order_statuses() ),
+			array(
+				'trash',
+				'wc-pending',
+				'wc-on-hold',
+				'wc-refunded',
+				'wc-failed',
+				'wc-checkout-draft',
+				'wc-cancelled',
+			)
+		);
+
+		$args = array(
+			'post_type'      => 'shop_order',
+			'posts_per_page' => 10,
+			'orderby'        => 'ID',
+			'order'          => 'ASC',
+			'post_status'    => $statuses,
+			'meta_query'     => array(
+				array(
+					'key'     => $this->namer->getRecordedMetaKeyName(),
+					'compare' => 'NOT EXISTS',
+					'value'   => '',
+				),
+			),
+		);
+
+		$query   = new WP_Query( $args );
+		$orders_ = $query->get_posts();
+		$orders  = array();
+
+		/**
+		 * @var WP_Post $order
+		 */
+		foreach ( $orders_ as $order ) {
+			$orders[] = $this->getOrder( $order->ID );
+		}
+
+		return $orders;
+	}
+
+	/**
 	 * @return AbstractProduct[]
-	 * @throws InvalidKeyNameSortException
+	 * @throws InvalidKeyNameException
 	 */
 	public function getProductsWithNoRecentUpdatedIndex(): array {
+		$date = date( 'Y-m-d 00:00:00' );
+
 		$args = array(
-			'limit'      => $this->optimalPostsCountFinder->getOptimalPostsCount(),
-			'orderby'    => 'ID',
-			'order'      => 'ASC',
-			'meta_query' => array(
+			'post_type'      => 'product',
+			'posts_per_page' => $this->optimalPostsCountFinder->getOptimalPostsCount(),
+			'orderby'        => 'ID',
+			'order'          => 'ASC',
+			'meta_query'     => array(
 				'relation' => 'OR',
 				array(
-					'key'     => 'merge-org-sort-last_index_update',
-					'value'   => date( 'Y-m-d' ),
+					'key'     => $this->namer->getLastIndexUpdateMetaKeyName(),
+					'value'   => $date,
 					'compare' => '<',
 					'type'    => 'DATE',
 				),
 				array(
-					'key'     => 'merge-org-sort-last_index_update',
+					'key'     => $this->namer->getLastIndexUpdateMetaKeyName(),
 					'value'   => '',
 					'compare' => 'NOT EXISTS',
 				),
 			),
 		);
 
-		$query     = new WC_Product_Query( $args );
-		$products_ = $query->get_products();
+		$query     = new WP_Query( $args );
+		$products_ = $query->get_posts();
 		$products  = array();
 
 		/**
-		 * @var WC_Product $product
+		 * @var WP_Post $product
 		 */
 		foreach ( $products_ as $product ) {
-			$products[] = $this->getProduct( $product->get_id() );
+			$products[] = $this->getProduct( $product->ID );
 		}
 
 		return $products;
