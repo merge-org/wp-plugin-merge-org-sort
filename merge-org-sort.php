@@ -7,14 +7,14 @@ declare(strict_types=1);
  * Description: 📊Sort - Sales Order Ranking Tool | Powered by Merge
  * Author: Merge
  * Author URI: https://github.com/merge-org
- * Version: 1.0.50
+ * Version: 1.0.53
  * Text Domain: merge-org-sort
  * Domain Path: /languages
  * Requires PHP: 7.4
  * Requires at least: 6.0
- * Tested up to: 6.4
+ * Tested up to: 6.4.3
  * WC requires at least: 7.0
- * WC tested up to: 8.1.1
+ * WC tested up to: 8.7.0
  */
 
 namespace MergeOrg\Sort;
@@ -33,5 +33,4 @@ try {
 			echo "<div class='notice notice-error'><p>Sort | Error: {$sortException->getMessage()}{$sortException->getTraceAsString()}</p></div>";
 		}
 	);
-	return;
 }

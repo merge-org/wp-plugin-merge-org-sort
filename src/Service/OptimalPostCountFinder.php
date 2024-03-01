@@ -22,8 +22,7 @@ final class OptimalPostCountFinder {
 	 */
 	public function getOptimalPostsCount(): int {
 		$serverLoad             = $this->serverLoadCalculator->calculate();
-		$optimalPostCountMemory =
-			max( 5, floor( $serverLoad->getAvailableMemory() / 5000000000 ) );
+		$optimalPostCountMemory = max( 10, floor( $serverLoad->getAvailableMemory() / 5000000000 ) );
 
 		$optimalPostCountMemory > 50 && ( $optimalPostCountMemory = 50 );
 

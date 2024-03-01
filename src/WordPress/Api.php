@@ -172,8 +172,8 @@ final class Api implements ApiInterface {
 
 		return new Order(
 			$order->get_id(),
-			$order->get_date_paid()->format( 'Y-m-d' ),
 			$order->get_status(),
+			$order->get_date_paid()->format( 'Y-m-d H:i:s' ),
 			$lineItems,
 			$this->getOrderIsRecorded( $order->get_id() )
 		);
@@ -219,7 +219,7 @@ final class Api implements ApiInterface {
 
 		$args = array(
 			'post_type'      => 'shop_order',
-			'posts_per_page' => 10,
+			'posts_per_page' => (int) ceil( $this->optimalPostsCountFinder->getOptimalPostsCount() / 2 ),
 			'orderby'        => 'ID',
 			'order'          => 'ASC',
 			'post_status'    => $statuses,
@@ -228,6 +228,12 @@ final class Api implements ApiInterface {
 					'key'     => $this->namer->getRecordedMetaKeyName(),
 					'compare' => 'NOT EXISTS',
 					'value'   => '',
+				),
+			),
+			'date_query'     => array(
+				array(
+					'after'     => date( 'Y-m-d 00:00:00', strtotime( '-365 days' ) ),
+					'inclusive' => true,
 				),
 			),
 		);

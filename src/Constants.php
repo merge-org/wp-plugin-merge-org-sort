@@ -71,6 +71,16 @@ final class Constants {
 	public const KEY_SERVER_LOAD_CACHE = 'server_load_cache';
 
 	/**
+	 *
+	 */
+	public const MINIMUM_WP_ACCEPTED_VERSION = '6.0.0';
+
+	/**
+	 *
+	 */
+	public const MINIMUM_WC_ACCEPTED_VERSION = '7.0.0';
+
+	/**
 	 * TODO CHECK IF THIS NEEDS TO BE HERE OR HARD CODE IT
 	 */
 	public const SALES_PERIODS = array(
