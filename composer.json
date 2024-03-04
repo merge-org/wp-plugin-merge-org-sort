@@ -9,8 +9,8 @@
     "description": "",
     "require": {
         "php": "^7.4||^8",
-        "ext-json": "*",
         "ext-curl": "*",
+        "ext-json": "*",
         "ext-redis": "*"
     },
     "autoload": {
@@ -18,5 +18,5 @@
             "MergeOrg\\Sort\\": "src"
         }
     },
-    "version": "1.0.53"
+    "version": "1.0.54"
 }

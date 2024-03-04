@@ -42,7 +42,7 @@ final class Logger {
 	 * @return void
 	 */
 	public function log( string $level, string $message ): void {
-		if ( $this->logger ?? null ) {
+		if ( ! ( $this->logger ?? null ) ) {
 			return;
 		}
 

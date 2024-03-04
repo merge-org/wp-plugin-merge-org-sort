@@ -101,11 +101,12 @@ final class ActionsRegistrar {
 			'init',
 			function () {
 				if ( wp_doing_cron() ) {
-					$cronFile = ABSPATH . '/wp-content/uploads/cron.txt';
-					$content  = file_exists( $cronFile ) ? file_get_contents( $cronFile ) : '';
-					$lines    = explode( PHP_EOL, $content );
-					$index    = count( $lines );
-					file_put_contents( $cronFile, "CRON $index" . PHP_EOL, FILE_APPEND );
+					$orderRecorder   = $this->get( OrderRecorder::class );
+					$orderRepository = $this->get( OrderRepository::class );
+					$orders          = $orderRepository->getOrdersNotRecorded();
+					foreach ( $orders as $order ) {
+						$orderRecorder->record( $order->getId() );
+					}
 				}
 			}
 		);
@@ -148,7 +149,7 @@ final class ActionsRegistrar {
 	private function get( string $key ) {
 		if ( ! $this->got ) {
 			$this->definitions[ Namer::class ]                         = $namer = new Namer();
-			$this->definitions[ Logger::class ]                        = new Logger( $namer );
+			$this->definitions[ Logger::class ]                        = $logger = new Logger( $namer );
 			$this->definitions[ Cache::class ]                         = $cache = new Cache();
 			$this->definitions[ ServerLoadCalculatorInterface::class ] =
 			$serverLoadCalculator                                      = new ServerLoadCalculator( $cache, $namer );
@@ -163,9 +164,9 @@ final class ActionsRegistrar {
 			$this->definitions[ SalesIncrementer::class ] = $salesIncrementer = new SalesIncrementer();
 			$this->definitions[ ProductToBeIncrementedCollectionGenerator::class ] =
 			$productToBeIncrementedCollectionGenerator                             =
-				new ProductToBeIncrementedCollectionGenerator( $orderRepository, $productRepository, $salesIncrementer );
+				new ProductToBeIncrementedCollectionGenerator( $orderRepository, $productRepository, $salesIncrementer, $logger );
 			$this->definitions[ OrderRecorder::class ]                             =
-				new OrderRecorder( $productToBeIncrementedCollectionGenerator, $productRepository, $orderRepository );
+				new OrderRecorder( $productToBeIncrementedCollectionGenerator, $productRepository, $orderRepository, $logger );
 			$this->got = true;
 		}
 
