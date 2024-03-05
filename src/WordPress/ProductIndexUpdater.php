@@ -7,6 +7,12 @@ use MergeOrg\Sort\Data\Product;
 use MergeOrg\Sort\Service\Namer;
 use MergeOrg\Sort\Exception\InvalidKeyNameException;
 
+/**
+ * Class ProductIndexUpdater
+ *
+ * @package MergeOrg\Sort\WordPress
+ * @codeCoverageIgnore
+ */
 final class ProductIndexUpdater {
 
 	/**

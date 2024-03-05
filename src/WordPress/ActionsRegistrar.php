@@ -137,9 +137,9 @@ final class ActionsRegistrar {
 			$this->definitions[ ApiInterface::class ]       = $api = new Api( $namer, $cache );
 			$this->definitions[ SalesPeriodManager::class ] = $salesPeriodManager = new SalesPeriodManager( $namer );
 			$this->definitions[ ProductRepository::class ]  =
-			$productRepository                              = new ProductRepository( $api, $salesPeriodManager, $cache, $namer );
+			$productRepository                              = new ProductRepository( $api, $salesPeriodManager, $namer );
 			$this->definitions[ OrderRepository::class ]    =
-			$orderRepository                                = new OrderRepository( $api, $namer, $cache );
+			$orderRepository                                = new OrderRepository( $api, $namer );
 			$this->definitions[ SalesIncrementer::class ]   = $salesIncrementer = new SalesIncrementer();
 			$this->definitions[ ProductToBeIncrementedCollectionGenerator::class ] =
 			$productToBeIncrementedCollectionGenerator                             =
