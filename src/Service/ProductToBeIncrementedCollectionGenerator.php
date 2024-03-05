@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort\Service;
 
-use MergeOrg\Sort\WordPress\Logger;
 use MergeOrg\Sort\Data\ProductToBeIncremented;
 use MergeOrg\Sort\Exception\InvalidKeyNameException;
 use MergeOrg\Sort\Data\ProductVariationToBeIncremented;
@@ -27,26 +26,18 @@ final class ProductToBeIncrementedCollectionGenerator {
 	private SalesIncrementer $salesIncrementer;
 
 	/**
-	 * @var Logger
-	 */
-	private Logger $logger;
-
-	/**
 	 * @param OrderRepository   $orderRepository
 	 * @param ProductRepository $productRepository
 	 * @param SalesIncrementer  $salesIncrementer
-	 * @param Logger            $logger
 	 */
 	public function __construct(
 		OrderRepository $orderRepository,
 		ProductRepository $productRepository,
-		SalesIncrementer $salesIncrementer,
-		Logger $logger
+		SalesIncrementer $salesIncrementer
 	) {
 		$this->orderRepository   = $orderRepository;
 		$this->productRepository = $productRepository;
 		$this->salesIncrementer  = $salesIncrementer;
-		$this->logger            = $logger;
 	}
 
 	/**
@@ -72,10 +63,11 @@ final class ProductToBeIncrementedCollectionGenerator {
 			}
 
 			$productSalesToBeUpdated =
-				$this->salesIncrementer->increment( $product->getSales(), $lineItem->getQuantity(), $order->getDate() );
-
-			$sales = print_r( $productSalesToBeUpdated, true );
-			$this->logger->log( 'info', "Sales for product '{$product->getId()}': $sales" );
+				$this->salesIncrementer->increment(
+					$product->getSales(),
+					$lineItem->getQuantity(),
+					$order->getDate()->format( 'Y-m-d' )
+				);
 
 			$productToBeIncrementedCollection->addProductToBeIncremented(
 				new ProductToBeIncremented(
@@ -89,8 +81,13 @@ final class ProductToBeIncrementedCollectionGenerator {
 				if ( ! $variation ) {
 					continue;
 				}
+
 				$variationSalesToBeUpdated =
-					$this->salesIncrementer->increment( $variation->getSales(), $lineItem->getQuantity(), $order->getDate() );
+					$this->salesIncrementer->increment(
+						$variation->getSales(),
+						$lineItem->getQuantity(),
+						$order->getDate()->format( 'Y-m-d' )
+					);
 				$productToBeIncrementedCollection->addProductToBeIncremented(
 					new ProductVariationToBeIncremented(
 						$variation->getId(),

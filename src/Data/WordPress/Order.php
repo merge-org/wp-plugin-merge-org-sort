@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort\Data\WordPress;
 
+use DateTime;
+
 final class Order {
 
 	/**
@@ -11,9 +13,9 @@ final class Order {
 	private int $id;
 
 	/**
-	 * @var string
+	 * @var DateTime
 	 */
-	private string $date;
+	private DateTime $date;
 
 	/**
 	 * @var string
@@ -33,11 +35,11 @@ final class Order {
 	/**
 	 * @param int        $id
 	 * @param string     $status
-	 * @param string     $date
+	 * @param DateTime   $date
 	 * @param LineItem[] $lineItems
 	 * @param bool       $recorded
 	 */
-	public function __construct( int $id, string $status, string $date, array $lineItems, bool $recorded ) {
+	public function __construct( int $id, string $status, DateTime $date, array $lineItems, bool $recorded ) {
 		$this->id        = $id;
 		$this->date      = $date;
 		$this->status    = $status;
@@ -53,9 +55,9 @@ final class Order {
 	}
 
 	/**
-	 * @return string
+	 * @return DateTime
 	 */
-	public function getDate(): string {
+	public function getDate(): DateTime {
 		return $this->date;
 	}
 

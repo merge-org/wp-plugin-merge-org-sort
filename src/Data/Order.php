@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort\Data;
 
+use DateTime;
 use JsonSerializable;
 
 /**
@@ -18,9 +19,9 @@ final class Order implements JsonSerializable {
 	private int $id;
 
 	/**
-	 * @var string
+	 * @var DateTime
 	 */
-	private string $date;
+	private DateTime $date;
 
 	/**
 	 * @var string
@@ -39,12 +40,12 @@ final class Order implements JsonSerializable {
 
 	/**
 	 * @param int        $id
-	 * @param string     $date
+	 * @param DateTime   $date
 	 * @param string     $status
 	 * @param LineItem[] $lineItems
 	 * @param bool       $recorded
 	 */
-	public function __construct( int $id, string $date, string $status, array $lineItems, bool $recorded ) {
+	public function __construct( int $id, DateTime $date, string $status, array $lineItems, bool $recorded ) {
 		$this->id        = $id;
 		$this->date      = $date;
 		$this->status    = $status;
@@ -73,9 +74,9 @@ final class Order implements JsonSerializable {
 	}
 
 	/**
-	 * @return string
+	 * @return DateTime
 	 */
-	public function getDate(): string {
+	public function getDate(): DateTime {
 		return $this->date;
 	}
 

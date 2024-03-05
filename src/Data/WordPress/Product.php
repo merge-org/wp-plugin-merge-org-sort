@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort\Data\WordPress;
 
+use DateTime;
 use MergeOrg\Sort\Constants;
 
 final class Product extends AbstractProduct {
@@ -18,23 +19,23 @@ final class Product extends AbstractProduct {
 	private int $previousMenuOrder;
 
 	/**
-	 * @var string
+	 * @var DateTime
 	 */
-	private string $lastIndexUpdate;
+	private DateTime $lastIndexUpdate;
 
 	/**
 	 * @param int                            $id
 	 * @param array<string, array<int, int>> $sales
 	 * @param bool                           $excludedFromSorting
 	 * @param int                            $previousMenuOrder
-	 * @param string                         $lastIndexUpdate
+	 * @param DateTime                       $lastIndexUpdate
 	 */
 	public function __construct(
 		int $id,
-		array $sales = array(),
-		bool $excludedFromSorting = false,
-		int $previousMenuOrder = -1,
-		string $lastIndexUpdate = '1970-01-01'
+		array $sales,
+		bool $excludedFromSorting,
+		int $previousMenuOrder,
+		DateTime $lastIndexUpdate
 	) {
 		parent::__construct( $id, $sales );
 		$this->excludedFromSorting = $excludedFromSorting;
@@ -64,9 +65,9 @@ final class Product extends AbstractProduct {
 	}
 
 	/**
-	 * @return string
+	 * @return DateTime
 	 */
-	public function getLastIndexUpdate(): string {
+	public function getLastIndexUpdate(): DateTime {
 		return $this->lastIndexUpdate;
 	}
 }

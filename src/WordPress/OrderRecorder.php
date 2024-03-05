@@ -32,26 +32,18 @@ final class OrderRecorder {
 	private OrderRepository $orderRepository;
 
 	/**
-	 * @var Logger
-	 */
-	private Logger $logger;
-
-	/**
 	 * @param ProductToBeIncrementedCollectionGenerator $productToBeIncrementedCollectionGenerator
 	 * @param ProductRepository                         $productRepository
 	 * @param OrderRepository                           $orderRepository
-	 * @param Logger                                    $logger
 	 */
 	public function __construct(
 		ProductToBeIncrementedCollectionGenerator $productToBeIncrementedCollectionGenerator,
 		ProductRepository $productRepository,
-		OrderRepository $orderRepository,
-		Logger $logger
+		OrderRepository $orderRepository
 	) {
 		$this->productToBeIncrementedCollectionGenerator = $productToBeIncrementedCollectionGenerator;
 		$this->productRepository                         = $productRepository;
 		$this->orderRepository                           = $orderRepository;
-		$this->logger                                    = $logger;
 	}
 
 	/**
@@ -60,15 +52,12 @@ final class OrderRecorder {
 	 * @throws InvalidKeyNameException
 	 */
 	public function record( int $orderId ): void {
-		$this->logger->log( 'info', "Starting gathering info for order '$orderId'" );
 		$productToBeIncrementedCollection = $this->productToBeIncrementedCollectionGenerator->generate( $orderId );
+		if ( ! $productToBeIncrementedCollection ) {
+			return;
+		}
 
-		$productsCount = count( $products = $productToBeIncrementedCollection->getCollection() );
-
-		$this->logger->log( 'info', "Order '$orderId' has '$productsCount' products" );
-
-		foreach ( $products as $productToBeIncremented ) {
-			$this->logger->log( 'info', "Trying to update sales for product '{$productToBeIncremented->getId()}'" );
+		foreach ( $productToBeIncrementedCollection->getCollection() as $productToBeIncremented ) {
 			$this->productRepository->setProductSales(
 				$productToBeIncremented->getId(),
 				$productToBeIncremented->getSalesToBeUpdated()

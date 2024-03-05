@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort\Data;
 
+use DateTime;
 use MergeOrg\Sort\Constants;
 use MergeOrg\Sort\Service\Namer;
 use MergeOrg\Sort\Exception\InvalidKeyNameException;
@@ -20,9 +21,9 @@ final class Product extends AbstractProduct {
 	private int $previousMenuOrder;
 
 	/**
-	 * @var string
+	 * @var DateTime
 	 */
-	private string $lastIndexUpdate;
+	private DateTime $lastIndexUpdate;
 
 	/**
 	 * @param int                           $id
@@ -30,7 +31,7 @@ final class Product extends AbstractProduct {
 	 * @param SalesPeriod[]                 $salesPeriods
 	 * @param bool                          $excludedFromSorting
 	 * @param int                           $previousMenuOrder
-	 * @param string                        $lastIndexUpdate
+	 * @param DateTime                      $lastIndexUpdate
 	 */
 	public function __construct(
 		int $id,
@@ -38,7 +39,7 @@ final class Product extends AbstractProduct {
 		array $salesPeriods,
 		bool $excludedFromSorting,
 		int $previousMenuOrder,
-		string $lastIndexUpdate = '1970-01-01'
+		DateTime $lastIndexUpdate
 	) {
 		parent::__construct( $id, $sales, $salesPeriods );
 		$this->excludedFromSorting = $excludedFromSorting;
@@ -79,9 +80,9 @@ final class Product extends AbstractProduct {
 	}
 
 	/**
-	 * @return string
+	 * @return DateTime
 	 */
-	public function getLastIndexUpdate(): string {
+	public function getLastIndexUpdate(): DateTime {
 		return $this->lastIndexUpdate;
 	}
 

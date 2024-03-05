@@ -5,12 +5,13 @@ namespace MergeOrg\Sort\WordPress;
 
 use WP_Post;
 use WP_Query;
+use DateTime;
+use Exception;
 use MergeOrg\Sort\Service\Namer;
 use MergeOrg\Sort\Data\WordPress\Order;
 use MergeOrg\Sort\Data\WordPress\Product;
 use MergeOrg\Sort\Data\WordPress\LineItem;
 use MergeOrg\Sort\Data\WordPress\AbstractProduct;
-use MergeOrg\Sort\Service\OptimalPostCountFinder;
 use MergeOrg\Sort\Data\WordPress\ProductVariation;
 use MergeOrg\Sort\Exception\InvalidKeyNameException;
 
@@ -28,17 +29,17 @@ final class Api implements ApiInterface {
 	private Namer $namer;
 
 	/**
-	 * @var OptimalPostCountFinder
+	 * @var CacheInterface
 	 */
-	private OptimalPostCountFinder $optimalPostsCountFinder;
+	private CacheInterface $cache;
 
 	/**
-	 * @param Namer                  $namer
-	 * @param OptimalPostCountFinder $optimalPostsCountFinder
+	 * @param Namer          $namer
+	 * @param CacheInterface $cache
 	 */
-	public function __construct( Namer $namer, OptimalPostCountFinder $optimalPostsCountFinder ) {
-		$this->namer                   = $namer;
-		$this->optimalPostsCountFinder = $optimalPostsCountFinder;
+	public function __construct( Namer $namer, CacheInterface $cache ) {
+		$this->namer = $namer;
+		$this->cache = $cache;
 	}
 
 	/**
@@ -124,10 +125,13 @@ final class Api implements ApiInterface {
 	}
 
 	/**
+	 * @param int $productId
+	 * @return DateTime
 	 * @throws InvalidKeyNameException
+	 * @throws Exception
 	 */
-	public function getProductLastIndexUpdate( int $productId ): string {
-		return $this->getPostMeta( $productId, $this->namer->getLastIndexUpdateMetaKeyName(), '1970-01-01' );
+	public function getProductLastIndexUpdate( int $productId ): DateTime {
+		return new DateTime( $this->getPostMeta( $productId, $this->namer->getLastIndexUpdateMetaKeyName(), '1970-01-01' ) );
 	}
 
 	/**
@@ -147,6 +151,7 @@ final class Api implements ApiInterface {
 	 * @param int $orderId
 	 * @return Order|null
 	 * @throws InvalidKeyNameException
+	 * @throws Exception
 	 */
 	public function getOrder( int $orderId ): ?Order {
 		if ( ! function_exists( 'wc_get_order' ) ) {
@@ -173,7 +178,7 @@ final class Api implements ApiInterface {
 		return new Order(
 			$order->get_id(),
 			$order->get_status(),
-			$order->get_date_paid()->format( 'Y-m-d' ),
+			new DateTime( $order->get_date_paid()->format( 'Y-m-d H:i:s' ) ),
 			$lineItems,
 			$this->getOrderIsRecorded( $order->get_id() )
 		);
@@ -218,25 +223,27 @@ final class Api implements ApiInterface {
 		);
 
 		$args = array(
-			'post_type'      => 'shop_order',
-			'posts_per_page' => (int) ceil( $this->optimalPostsCountFinder->getOptimalPostsCount() / 2 ),
-			'orderby'        => 'ID',
-			'order'          => 'ASC',
-			'post_status'    => $statuses,
-			'meta_query'     => array(
+			'post_type'   => 'shop_order',
+			'orderby'     => 'ID',
+			'order'       => 'ASC',
+			'post_status' => $statuses,
+			'meta_query'  => array(
 				array(
 					'key'     => $this->namer->getRecordedMetaKeyName(),
 					'compare' => 'NOT EXISTS',
 					'value'   => '',
 				),
 			),
-			'date_query'     => array(
+			'date_query'  => array(
 				array(
 					'after'     => date( 'Y-m-d 00:00:00', strtotime( '-365 days' ) ),
 					'inclusive' => true,
 				),
 			),
 		);
+
+		$total                  = $this->getTotal( $args );
+		$args['posts_per_page'] = $total;
 
 		$query   = new WP_Query( $args );
 		$orders_ = $query->get_posts();
@@ -253,18 +260,49 @@ final class Api implements ApiInterface {
 	}
 
 	/**
+	 * @param array<string, string|int|array<string, string|int>> $args
+	 * @param bool                                                $useCache
+	 * @return int
+	 */
+	private function getTotal( array $args, bool $useCache = true ): int {
+		unset( $args['meta_query'] );
+		unset( $args['date_query'] );
+		unset( $args['posts_per_page'] );
+
+		$cacheKey = md5( serialize( $args ) );
+		if ( ( $total = $this->cache->get( $cacheKey ) ) && $useCache ) {
+			return (int) $total;
+		}
+
+		$query        = new WP_Query( $args );
+		$foundPosts   = $query->found_posts;
+		$maxCronTries = ( 30 * 24 );
+		$maxTries     = (int) round( $maxCronTries / 3 );
+		$total        = (int) ceil( $foundPosts / $maxTries );
+		$total < 1 && ( $total = 1 );
+		$total > 120 && ( $total = 120 );
+
+		$this->cache->set( $cacheKey, $total, 3 * 24 * 60 * 60 );
+
+		return $total;
+	}
+
+	/**
 	 * @return AbstractProduct[]
 	 * @throws InvalidKeyNameException
 	 */
 	public function getProductsWithNoRecentUpdatedIndex(): array {
-		$date = date( 'Y-m-d 00:00:00' );
+		$date = date( 'Y-m-d 00:00:00', strtotime( '-2 days' ) );
 
 		$args = array(
-			'post_type'      => 'product',
-			'posts_per_page' => $this->optimalPostsCountFinder->getOptimalPostsCount(),
-			'orderby'        => 'ID',
-			'order'          => 'ASC',
-			'meta_query'     => array(
+			'post_type'   => 'product',
+			'post_status' => array(
+				'publish',
+				'draft',
+			),
+			'orderby'     => 'ID',
+			'order'       => 'ASC',
+			'meta_query'  => array(
 				'relation' => 'OR',
 				array(
 					'key'     => $this->namer->getLastIndexUpdateMetaKeyName(),
@@ -279,6 +317,9 @@ final class Api implements ApiInterface {
 				),
 			),
 		);
+
+		$total                  = $this->getTotal( $args );
+		$args['posts_per_page'] = $total;
 
 		$query     = new WP_Query( $args );
 		$products_ = $query->get_posts();

@@ -4,15 +4,11 @@ declare(strict_types=1);
 namespace MergeOrg\Sort\WordPress;
 
 use MergeOrg\Sort\Service\Namer;
-use MergeOrg\Sort\Exception\SortException;
 use MergeOrg\Sort\Service\OrderRepository;
 use MergeOrg\Sort\Service\SalesIncrementer;
 use MergeOrg\Sort\Service\ProductRepository;
 use MergeOrg\Sort\Service\SalesPeriodManager;
-use MergeOrg\Sort\Service\ServerLoadCalculator;
-use MergeOrg\Sort\Service\OptimalPostCountFinder;
 use MergeOrg\Sort\Exception\InvalidKeyNameException;
-use MergeOrg\Sort\Service\ServerLoadCalculatorInterface;
 use MergeOrg\Sort\Service\ProductToBeIncrementedCollectionGenerator;
 
 /**
@@ -72,8 +68,6 @@ final class ActionsRegistrar {
 			return;
 		}
 
-		$logger = $this->get( Logger::class );
-
 		if ( ! function_exists( 'wc_get_order' ) ) {
 			add_action(
 				'admin_notices',
@@ -84,55 +78,44 @@ final class ActionsRegistrar {
 			return;
 		}
 
-		// add_action("woocommerce_order_status_processing", function(int $orderId) use ($logger) {
-		// try {
-		// $this->get(OrderRecorder::class)->record($orderId);
-		// } catch(SortException $sortException) {
-		// **
-		// * @var Logger $logger
-		// */
-		// $logger->log("error", "{$sortException->getMessage()}: {$sortException->getTraceAsString()}");
-		//
-		// throw $sortException;
-		// }
-		// });
-
 		add_action(
 			'init',
 			function () {
 				if ( wp_doing_cron() ) {
+					$logger = $this->get( Logger::class );
+
+					// Order Recording
 					$orderRecorder   = $this->get( OrderRecorder::class );
 					$orderRepository = $this->get( OrderRepository::class );
-					$orders          = $orderRepository->getOrdersNotRecorded();
+
+					$logger->log( 'info', 'Will try to get non recorded orders' );
+					$orders      = $orderRepository->getOrdersNotRecorded();
+					$ordersCount = count( $orders );
+					$logger->log( 'info', "Found '$ordersCount' non recored orders" );
 					foreach ( $orders as $order ) {
+						$logger->log( 'info', "Recording order #{$order->getId()}" );
 						$orderRecorder->record( $order->getId() );
+						$logger->log( 'info', "Order #{$order->getId()} was recorded" );
+					}
+
+					// Products Indexing Update
+					$productRepository   = $this->get( ProductRepository::class );
+					$productIndexUpdater = $this->get( ProductIndexUpdater::class );
+
+					$logger->log( 'info', 'Will try to get non updated products' );
+					$products      = $productRepository->getProductsWithNoRecentUpdatedIndex();
+					$productsCount = count( $products );
+					$logger->log( 'info', "Found '$productsCount' non updated products" );
+					foreach ( $products as $product ) {
+						$logger->log( 'info', "Updating product #{$product->getId()}" );
+						$productIndexUpdater->update( $product );
+						$logger->log( 'info', "Product #{$product->getId()} was updated" );
 					}
 				}
 			}
 		);
 
-		add_action(
-			'merge-org-sort-update_products_indexes',
-			function () use ( $logger ) {
-				try {
-					$this->get( ProductRepository::class )->setProductsIndexes();
-				} catch ( SortException $sortException ) {
-					/**
-					 * @var Logger $logger
-					 */
-					$logger->log( 'error', "{$sortException->getMessage()}: {$sortException->getTraceAsString()}" );
-
-					throw $sortException;
-				}
-			}
-		);
-
 		$development = file_exists( __DIR__ . '/../dev-inc/dev-actions.php' );
-
-		// add_action("init", function() use ($development) {
-		// wp_schedule_single_event(time() + ($development ? 10 : 600),
-		// "merge-org-sort-update_products_indexes");
-		// });
 
 		/**
 		 * This should fire only in a dev environment
@@ -148,25 +131,23 @@ final class ActionsRegistrar {
 	 */
 	private function get( string $key ) {
 		if ( ! $this->got ) {
-			$this->definitions[ Namer::class ]                         = $namer = new Namer();
-			$this->definitions[ Logger::class ]                        = $logger = new Logger( $namer );
-			$this->definitions[ Cache::class ]                         = $cache = new Cache();
-			$this->definitions[ ServerLoadCalculatorInterface::class ] =
-			$serverLoadCalculator                                      = new ServerLoadCalculator( $cache, $namer );
-			$this->definitions[ OptimalPostCountFinder::class ]        =
-			$optimalPostsCountFinder                                   = new OptimalPostCountFinder( $serverLoadCalculator );
-			$this->definitions[ ApiInterface::class ]                  = $api = new Api( $namer, $optimalPostsCountFinder );
-			$this->definitions[ SalesPeriodManager::class ]            = $salesPeriodManager = new SalesPeriodManager( $namer );
-			$this->definitions[ ProductRepository::class ]             =
-			$productRepository                            = new ProductRepository( $api, $salesPeriodManager, $cache, $namer );
-			$this->definitions[ OrderRepository::class ]  =
-			$orderRepository                              = new OrderRepository( $api, $namer, $cache );
-			$this->definitions[ SalesIncrementer::class ] = $salesIncrementer = new SalesIncrementer();
+			$this->definitions[ Namer::class ]              = $namer = new Namer();
+			$this->definitions[ Logger::class ]             = $logger = new Logger( $namer );
+			$this->definitions[ Cache::class ]              = $cache = new Cache();
+			$this->definitions[ ApiInterface::class ]       = $api = new Api( $namer, $cache );
+			$this->definitions[ SalesPeriodManager::class ] = $salesPeriodManager = new SalesPeriodManager( $namer );
+			$this->definitions[ ProductRepository::class ]  =
+			$productRepository                              = new ProductRepository( $api, $salesPeriodManager, $cache, $namer );
+			$this->definitions[ OrderRepository::class ]    =
+			$orderRepository                                = new OrderRepository( $api, $namer, $cache );
+			$this->definitions[ SalesIncrementer::class ]   = $salesIncrementer = new SalesIncrementer();
 			$this->definitions[ ProductToBeIncrementedCollectionGenerator::class ] =
 			$productToBeIncrementedCollectionGenerator                             =
-				new ProductToBeIncrementedCollectionGenerator( $orderRepository, $productRepository, $salesIncrementer, $logger );
+				new ProductToBeIncrementedCollectionGenerator( $orderRepository, $productRepository, $salesIncrementer );
 			$this->definitions[ OrderRecorder::class ]                             =
-				new OrderRecorder( $productToBeIncrementedCollectionGenerator, $productRepository, $orderRepository, $logger );
+				new OrderRecorder( $productToBeIncrementedCollectionGenerator, $productRepository, $orderRepository );
+			$this->definitions[ ProductIndexUpdater::class ]                       = new ProductIndexUpdater( $namer, $api );
+
 			$this->got = true;
 		}
 
