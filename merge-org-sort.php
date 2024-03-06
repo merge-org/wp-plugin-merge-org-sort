@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Description: 📊Sort - Sales Order Ranking Tool | Powered by Merge
  * Author: Merge
  * Author URI: https://github.com/merge-org
- * Version: 1.1.2
+ * Version: 1.1.3
  * Text Domain: merge-org-sort
  * Domain Path: /languages
  * Requires PHP: 7.4
@@ -19,18 +19,6 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort;
 
-use MergeOrg\Sort\Exception\SortException;
-use MergeOrg\Sort\WordPress\ActionsRegistrar;
-
 require_once __DIR__ . '/vendor/autoload.php';
 
-try {
-	ActionsRegistrar::construct();
-} catch ( SortException $sortException ) {
-	add_action(
-		'admin_notices',
-		function () use ( $sortException ) {
-			echo "<div class='notice notice-error'><p>Sort | Error: {$sortException->getMessage()}{$sortException->getTraceAsString()}</p></div>";
-		}
-	);
-}
+file_exists( $devActionsFilePath = __DIR__ . '/src/dev-inc/dev-actions.php' ) && require_once $devActionsFilePath;

@@ -1,116 +1,66 @@
 <?php
 declare(strict_types=1);
 
-namespace MergeOrg\Sort;
+namespace MergeOrg\WpPluginSort;
 
 final class Constants {
 
 	/**
 	 *
 	 */
-	public const PLUGIN_NAME = 'merge-org-sort';
+	private const META_KEY_RECORDED = 'recorded';
 
 	/**
 	 *
 	 */
-	public const POST_TYPE_PRODUCT = 'product';
+	private const META_KEY_RECORDED_DATE_TIME = 'recorded_date_time';
 
 	/**
 	 *
 	 */
-	public const POST_TYPE_PRODUCT_VARIATION = 'product_variation';
+	private const META_KEY_SALES = 'sales';
 
 	/**
 	 *
 	 */
-	public const KEY_SALES = 'sales';
+	public const SALES_PURCHASE_KEY = 'purchase';
 
 	/**
 	 *
 	 */
-	public const KEY_EXCLUDE_FROM_SORTING = 'exclude_from_sorting';
+	public const SALES_QUANTITY_KEY = 'quantity';
 
 	/**
+	 * @return string
+	 */
+	public function getRecordedMetaKey(): string {
+		return $this->normalizeMetaKey( self::META_KEY_RECORDED );
+	}
+
+	/**
+	 * @param string $metaKey
+	 * @param bool   $hidden
 	 *
+	 * @return string
 	 */
-	public const KEY_PREVIOUS_ORDER = 'previous_order';
+	private function normalizeMetaKey( string $metaKey, bool $hidden = false ): string {
+		$prefix = '';
+		$hidden && ( $prefix = '_' );
+
+		return "{$prefix}merge-org-sort-$metaKey";
+	}
 
 	/**
-	 *
+	 * @return string
 	 */
-	public const KEY_RECORDED = 'recorded';
+	public function getSalesMetaKey(): string {
+		return $this->normalizeMetaKey( self::META_KEY_SALES );
+	}
 
 	/**
-	 *
+	 * @return string
 	 */
-	public const KEY_PERIOD_IN_DAYS = 'period_in_days';
-
-	/**
-	 *
-	 */
-	public const KEY_PERIOD_IN_DAYS_QUANTITY = 'period_in_days_quantity';
-
-	/**
-	 *
-	 */
-	public const KEY_LAST_INDEX_UPDATE = 'last_index_update';
-
-	/**
-	 *
-	 */
-	public const KEY_PRODUCT_CACHE = 'product_cache';
-
-	/**
-	 *
-	 */
-	public const KEY_ORDER_CACHE = 'order_cache';
-
-	/**
-	 *
-	 */
-	public const KEY_SERVER_LOAD_CACHE = 'server_load_cache';
-
-	/**
-	 *
-	 */
-	public const MINIMUM_WP_ACCEPTED_VERSION = '6.0.0';
-
-	/**
-	 *
-	 */
-	public const MINIMUM_WC_ACCEPTED_VERSION = '7.0.0';
-
-	/**
-	 * TODO CHECK IF THIS NEEDS TO BE HERE OR HARD CODE IT
-	 */
-	public const SALES_PERIODS = array(
-		1   => array(
-			'daily',
-			'Daily',
-		),
-		7   => array(
-			'weekly',
-			'Weekly',
-		),
-		15  => array(
-			'semi_monthly',
-			'Semi-Monthly',
-		),
-		30  => array(
-			'monthly',
-			'Monthly',
-		),
-		90  => array(
-			'quarterly',
-			'Quarterly',
-		),
-		180 => array(
-			'semi_annually',
-			'Semi-Annually',
-		),
-		365 => array(
-			'yearly',
-			'Yearly',
-		),
-	);
+	public function getRecordedDateTimeMetaKey(): string {
+		return $this->normalizeMetaKey( self::META_KEY_RECORDED_DATE_TIME );
+	}
 }

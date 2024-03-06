@@ -6,5 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'MergeOrg\\Sort\\' => array($baseDir . '/src'),
+    'MergeOrg\\WpPluginSort\\' => array($baseDir . '/src'),
 );

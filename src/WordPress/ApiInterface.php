@@ -1,78 +1,32 @@
 <?php
 declare(strict_types=1);
 
-namespace MergeOrg\Sort\WordPress;
+namespace MergeOrg\WpPluginSort\WordPress;
 
-use MergeOrg\Sort\Data\WordPress\Order;
-use MergeOrg\Sort\Data\WordPress\AbstractProduct;
-use MergeOrg\Sort\Exception\InvalidKeyNameException;
+use MergeOrg\WpPluginSort\Data\UnrecordedOrder\Order;
 
+/**
+ * @codeCoverageIgnore
+ */
 interface ApiInterface {
-
-	/**
-	 * @param int    $postId
-	 * @param string $metaKey
-	 * @param mixed  $default
-	 * @return mixed
-	 */
-	public function getPostMeta( int $postId, string $metaKey, $default = null );
-
-	/**
-	 * @param int $productId
-	 * @return AbstractProduct|null
-	 */
-	public function getProduct( int $productId ): ?AbstractProduct;
-
-	/**
-	 * @param int $productId
-	 * @return bool
-	 */
-	public function getProductIsExcludedFromSorting( int $productId ): bool;
-
-	/**
-	 * @param int $productId
-	 * @return int
-	 */
-	public function getProductPreviousOrder( int $productId ): int;
-
-	/**
-	 * @param int $orderId
-	 * @return Order|null
-	 */
-	public function getOrder( int $orderId ): ?Order;
-
-	/**
-	 * @return AbstractProduct[]
-	 * @throws InvalidKeyNameException
-	 */
-	public function getProductsWithNoRecentUpdatedIndex(): array;
-
-	/**
-	 * @param int    $postId
-	 * @param string $metaKey
-	 * @param mixed  $value
-	 * @return bool
-	 */
-	public function updatePostMeta( int $postId, string $metaKey, $value ): bool;
-
-	/**
-	 * @param int    $postId
-	 * @param string $metaKey
-	 * @param mixed  $value
-	 * @return bool
-	 */
-	public function updateProductMeta( int $postId, string $metaKey, $value ): bool;
-
-	/**
-	 * @param int    $postId
-	 * @param string $metaKey
-	 * @param mixed  $value
-	 * @return bool
-	 */
-	public function updateOrderMeta( int $postId, string $metaKey, $value ): bool;
 
 	/**
 	 * @return Order[]
 	 */
-	public function getOrdersNotRecorded(): array;
+	public function getUnrecordedOrders(): array;
+
+	/**
+	 * @param int $orderId
+	 *
+	 * @return void
+	 */
+	public function setOrderRecorded( int $orderId ): void;
+
+	/**
+	 * @param int                               $productId
+	 * @param array<string, array<string, int>> $sales
+	 *
+	 * @return void
+	 */
+	public function updateProductSales( int $productId, array $sales ): void;
 }

@@ -1,8 +1,8 @@
 <?php return array(
     'root' => array(
-        'name' => 'merge-org/sort',
-        'pretty_version' => '1.1.2',
-        'version' => '1.1.2.0',
+        'name' => 'merge-org/wp-plugin-merge-org-sort',
+        'pretty_version' => '1.1.3',
+        'version' => '1.1.3.0',
         'reference' => null,
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
@@ -10,9 +10,9 @@
         'dev' => false,
     ),
     'versions' => array(
-        'merge-org/sort' => array(
-            'pretty_version' => '1.1.2',
-            'version' => '1.1.2.0',
+        'merge-org/wp-plugin-merge-org-sort' => array(
+            'pretty_version' => '1.1.3',
+            'version' => '1.1.3.0',
             'reference' => null,
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
