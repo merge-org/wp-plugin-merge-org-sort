@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Description: 📊Sort - Sales Order Ranking Tool | Powered by Merge
  * Author: Merge
  * Author URI: https://github.com/merge-org
- * Version: 1.1.4
+ * Version: 1.1.6
  * Text Domain: merge-org-sort
  * Domain Path: /languages
  * Requires PHP: 7.4
@@ -19,6 +19,31 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort;
 
+use MergeOrg\WpPluginSort\Constants;
+use MergeOrg\WpPluginSort\WordPress\Api;
+use MergeOrg\WpPluginSort\Action\OrdersRecorder;
+use MergeOrg\WpPluginSort\Service\SalesIncrementer;
+use MergeOrg\WpPluginSort\Service\SalesPeriodManager;
+use MergeOrg\WpPluginSort\Action\ProductSalesPeriodsUpdater;
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 file_exists( $devActionsFilePath = __DIR__ . '/src/dev-inc/dev-actions.php' ) && require_once $devActionsFilePath;
+
+add_action(
+	'init',
+	function () {
+		if ( wp_doing_cron() ) {
+			$constants          = new Constants();
+			$salesPeriodManager = new SalesPeriodManager( $constants );
+			$api                = new Api( $constants, $salesPeriodManager );
+			$salesIncrementer   = new SalesIncrementer();
+
+			$ordersRecorder             = new OrdersRecorder( $api, $salesIncrementer );
+			$productSalesPeriodsUpdater = new ProductSalesPeriodsUpdater( $api );
+
+			$ordersRecorder->record();
+			$productSalesPeriodsUpdater->update();
+		}
+	}
+);

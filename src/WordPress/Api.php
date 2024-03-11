@@ -46,6 +46,7 @@ final class Api implements ApiInterface {
 		$dev  = ( $_ENV['APP_ENV'] ?? 'production' ) === 'dev';
 		$date = date( 'Y-m-d 00:00:00', strtotime( '-2 days' ) );
 		$dev && ( $date = date( 'Y-m-d 00:00:00', strtotime( '+1 days' ) ) );
+		$dev && ( $products = 100 );
 
 		$args = array(
 			'post_type'      => 'product',
