@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Description: 📊Sort - Sales Order Ranking Tool | Powered by Merge
  * Author: Merge
  * Author URI: https://github.com/merge-org
- * Version: 1.1.6
+ * Version: 1.1.7
  * Text Domain: merge-org-sort
  * Domain Path: /languages
  * Requires PHP: 7.4
@@ -19,12 +19,9 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort;
 
-use MergeOrg\WpPluginSort\Constants;
-use MergeOrg\WpPluginSort\WordPress\Api;
-use MergeOrg\WpPluginSort\Action\OrdersRecorder;
-use MergeOrg\WpPluginSort\Service\SalesIncrementer;
-use MergeOrg\WpPluginSort\Service\SalesPeriodManager;
-use MergeOrg\WpPluginSort\Action\ProductSalesPeriodsUpdater;
+use MergeOrg\WpPluginSort\Container;
+use MergeOrg\WpPluginSort\Model\OrdersRecorder;
+use MergeOrg\WpPluginSort\Model\ProductSalesPeriodsUpdater;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -34,13 +31,15 @@ add_action(
 	'init',
 	function () {
 		if ( wp_doing_cron() ) {
-			$constants          = new Constants();
-			$salesPeriodManager = new SalesPeriodManager( $constants );
-			$api                = new Api( $constants, $salesPeriodManager );
-			$salesIncrementer   = new SalesIncrementer();
+			/**
+			 * @var OrdersRecorder $ordersRecorder
+			 */
+			$ordersRecorder = Container::get( OrdersRecorder::class );
 
-			$ordersRecorder             = new OrdersRecorder( $api, $salesIncrementer );
-			$productSalesPeriodsUpdater = new ProductSalesPeriodsUpdater( $api );
+			/**
+			 * @var ProductSalesPeriodsUpdater $productSalesPeriodsUpdater
+			 */
+			$productSalesPeriodsUpdater = Container::get( ProductSalesPeriodsUpdater::class );
 
 			$ordersRecorder->record();
 			$productSalesPeriodsUpdater->update();

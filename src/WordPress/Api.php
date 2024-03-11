@@ -6,7 +6,9 @@ namespace MergeOrg\WpPluginSort\WordPress;
 use WP_Post;
 use WP_Query;
 use DateTime;
+use WC_Order;
 use Exception;
+use WC_Product;
 use MergeOrg\WpPluginSort\Constants;
 use MergeOrg\WpPluginSort\Data\UnrecordedOrder\Order;
 use MergeOrg\WpPluginSort\Service\SalesPeriodManager;
@@ -42,7 +44,7 @@ final class Api implements ApiInterface {
 	 * @param int $products
 	 * @return \MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product[]
 	 */
-	public function getNonUpdatedSalesPeriodsProducts( int $products = 10 ): array {
+	public function getNonUpdatedSalesPeriodsProducts( int $products = 5 ): array {
 		$dev  = ( $_ENV['APP_ENV'] ?? 'production' ) === 'dev';
 		$date = date( 'Y-m-d 00:00:00', strtotime( '-2 days' ) );
 		$dev && ( $date = date( 'Y-m-d 00:00:00', strtotime( '+1 days' ) ) );
@@ -93,7 +95,7 @@ final class Api implements ApiInterface {
 	 * @return Order[]
 	 * @throws Exception
 	 */
-	public function getUnrecordedOrders( int $orders = 50 ): array {
+	public function getUnrecordedOrders( int $orders = 10 ): array {
 		$statuses = array_diff(
 			array_keys( wc_get_order_statuses() ),
 			array(
@@ -136,7 +138,7 @@ final class Api implements ApiInterface {
 		 * @var WP_Post $order
 		 */
 		foreach ( $orders_ as $order ) {
-			$order = wc_get_order( $order->ID );
+			$order = $this->getOrder( $order->ID );
 			if ( ! $order ) {
 				continue;
 			}
@@ -162,11 +164,29 @@ final class Api implements ApiInterface {
 	}
 
 	/**
+	 * TODO CHECK THE POSSIBILITY OF USING CACHE
+	 *
+	 * @param int $orderId
+	 * @return WC_Order|null
+	 */
+	private function getOrder( int $orderId ): ?WC_Order {
+		// if($order = ($this->orderCache[$orderId] ?? FALSE)) {
+		// return $order;
+		// }
+		//
+		// return ($order = wc_get_order($orderId)) ? $this->orderCache[$orderId] = $order : NULL;
+
+		$order = wc_get_order( $orderId );
+
+		return $order instanceof WC_Order ? $order : null;
+	}
+
+	/**
 	 * @param int $orderId
 	 * @return void
 	 */
 	public function setOrderRecorded( int $orderId ): void {
-		if ( ! ( $order = wc_get_order( $orderId ) )
+		if ( ! ( $order = $this->getOrder( $orderId ) )
 			|| $order->get_meta( $this->constants->getRecordedMetaKey() ) === 'yes'
 		) {
 			return;
@@ -198,8 +218,7 @@ final class Api implements ApiInterface {
 	 * @return void
 	 */
 	public function updateProductSalesPeriod( int $productId, int $days, int $purchaseSales, int $quantitySales ): void {
-		// TODO MAYBE THIS HAS A NEGATIVE IMPACT
-		if ( ! ( $product = wc_get_product( $productId ) ) ) {
+		if ( ! ( $product = $this->getProduct( $productId ) ) ) {
 			return;
 		}
 
@@ -209,12 +228,30 @@ final class Api implements ApiInterface {
 	}
 
 	/**
+	 * TODO CHECK THE POSSIBILITY OF USING CACHE
+	 *
+	 * @param int $productId
+	 * @return WC_Product|null
+	 */
+	private function getProduct( int $productId ): ?WC_Product {
+		// if($product = ($this->productCache[$productId] ?? FALSE)) {
+		// return $product;
+		// }
+		//
+		// return ($product = wc_get_product($productId)) ? $this->productCache[$productId] = $product : NULL;
+
+		$product = wc_get_product( $productId );
+
+		return $product instanceof WC_Product ? $product : null;
+	}
+
+	/**
 	 * @param int                               $productId
 	 * @param array<string, array<string, int>> $sales
 	 * @return void
 	 */
 	public function updateProductSales( int $productId, array $sales ): void {
-		if ( ! ( $product = wc_get_product( $productId ) ) ) {
+		if ( ! ( $product = $this->getProduct( $productId ) ) ) {
 			return;
 		}
 

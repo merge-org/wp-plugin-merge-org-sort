@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace MergeOrg\WpPluginSort\Action;
+namespace MergeOrg\WpPluginSort\Model;
 
 use MergeOrg\WpPluginSort\WordPress\ApiInterface;
 use MergeOrg\WpPluginSort\Service\SalesIncrementer;
@@ -34,7 +34,7 @@ final class OrdersRecorder {
 	/**
 	 * @return Order[]
 	 */
-	public function record( int $orders = 50 ): array {
+	public function record( int $orders = 10 ): array {
 		$nonRecordedOrders = $this->api->getUnrecordedOrders( $orders );
 		foreach ( $nonRecordedOrders as $nonRecordedOrder ) {
 			$this->api->setOrderRecorded( $nonRecordedOrder->getId() );

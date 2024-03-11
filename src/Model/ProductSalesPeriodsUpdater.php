@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace MergeOrg\WpPluginSort\Action;
+namespace MergeOrg\WpPluginSort\Model;
 
 use MergeOrg\WpPluginSort\WordPress\ApiInterface;
 use MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product;
@@ -30,7 +30,7 @@ final class ProductSalesPeriodsUpdater {
 	 * @param int $products
 	 * @return Product[]
 	 */
-	public function update( int $products = 10 ): array {
+	public function update( int $products = 5 ): array {
 		$nonUpdatedSalesPeriodsProducts = $this->api->getNonUpdatedSalesPeriodsProducts( $products );
 		foreach ( $nonUpdatedSalesPeriodsProducts as $product ) {
 			$this->api->updateProductSalesPeriodsLastUpdate( $product->getId() );
