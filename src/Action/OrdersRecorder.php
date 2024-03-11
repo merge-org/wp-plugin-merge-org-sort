@@ -34,8 +34,8 @@ final class OrdersRecorder {
 	/**
 	 * @return Order[]
 	 */
-	public function record(): array {
-		$nonRecordedOrders = $this->api->getUnrecordedOrders();
+	public function record( int $orders = 50 ): array {
+		$nonRecordedOrders = $this->api->getUnrecordedOrders( $orders );
 		foreach ( $nonRecordedOrders as $nonRecordedOrder ) {
 			$this->api->setOrderRecorded( $nonRecordedOrder->getId() );
 			foreach ( $nonRecordedOrder->getLineItems() as $lineItem ) {

@@ -23,6 +23,55 @@ final class Constants {
 	/**
 	 *
 	 */
+	private const META_KEY_SALES_PERIODS_LAST_UPDATE = 'sales_periods_last_update';
+
+	/**
+	 *
+	 */
+	private const META_KEY_SALES_PERIOD_PURCHASE = 'sales_period_purchase';
+
+	/**
+	 *
+	 */
+	private const META_KEY_SALES_PERIOD_QUANTITY = 'sales_period_quantity';
+
+	/**
+	 *
+	 */
+	private const SALES_PERIODS = array(
+		1   => array(
+			'daily',
+			'Daily',
+		),
+		7   => array(
+			'weekly',
+			'Weekly',
+		),
+		15  => array(
+			'semi_monthly',
+			'Semi-Monthly',
+		),
+		30  => array(
+			'monthly',
+			'Monthly',
+		),
+		90  => array(
+			'quarterly',
+			'Quarterly',
+		),
+		180 => array(
+			'semi_annually',
+			'Semi-Annually',
+		),
+		365 => array(
+			'yearly',
+			'Yearly',
+		),
+	);
+
+	/**
+	 *
+	 */
 	public const SALES_PURCHASE_KEY = 'purchase';
 
 	/**
@@ -40,7 +89,6 @@ final class Constants {
 	/**
 	 * @param string $metaKey
 	 * @param bool   $hidden
-	 *
 	 * @return string
 	 */
 	private function normalizeMetaKey( string $metaKey, bool $hidden = false ): string {
@@ -60,7 +108,41 @@ final class Constants {
 	/**
 	 * @return string
 	 */
+	public function getSalesPeriodsLastUpdateMetaKey(): string {
+		return $this->normalizeMetaKey( self::META_KEY_SALES_PERIODS_LAST_UPDATE );
+	}
+
+	/**
+	 * @return string
+	 */
 	public function getRecordedDateTimeMetaKey(): string {
 		return $this->normalizeMetaKey( self::META_KEY_RECORDED_DATE_TIME );
+	}
+
+	/**
+	 * @return int[]
+	 */
+	public function getSalesPeriodDays(): array {
+		return array_keys( self::SALES_PERIODS );
+	}
+
+	/**
+	 * @param int $days
+	 * @return string
+	 */
+	public function getSalesPeriodPurchaseMetaKey( int $days ): string {
+		$metaKey = $this->normalizeMetaKey( self::META_KEY_SALES_PERIOD_PURCHASE );
+
+		return "$metaKey-$days";
+	}
+
+	/**
+	 * @param int $days
+	 * @return string
+	 */
+	public function getSalesPeriodQuantityMetaKey( int $days ): string {
+		$metaKey = $this->normalizeMetaKey( self::META_KEY_SALES_PERIOD_QUANTITY );
+
+		return "$metaKey-$days";
 	}
 }
