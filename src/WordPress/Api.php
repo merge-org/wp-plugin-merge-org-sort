@@ -83,12 +83,21 @@ final class Api implements ApiInterface {
 		 * @var WP_Post $product
 		 */
 		foreach ( $products_ as $product ) {
-			$sales        = get_post_meta( $product->ID, $this->constants->getSalesMetaKey(), true ) ?: array();
-			$salesPeriods = $this->salesPeriodManager->getAllSalesPeriods( $sales );
-			$products[]   = new \MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product( $product->ID, $salesPeriods );
+			$products[] = $this->getNonUpdatedSalesPeriodsProduct( $product->ID );
 		}
 
 		return $products;
+	}
+
+	/**
+	 * @param int $productId
+	 * @return \MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product
+	 */
+	public function getNonUpdatedSalesPeriodsProduct( int $productId ): \MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product {
+		$sales        = get_post_meta( $productId, $this->constants->getSalesMetaKey(), true ) ?: array();
+		$salesPeriods = $this->salesPeriodManager->getAllSalesPeriods( $sales );
+
+		return new \MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product( $productId, $salesPeriods );
 	}
 
 	/**

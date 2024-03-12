@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Description: 📊Sort - Sales Order Ranking Tool | Powered by Merge
  * Author: Merge
  * Author URI: https://github.com/merge-org
- * Version: 1.1.7
+ * Version: 1.2.0
  * Text Domain: merge-org-sort
  * Domain Path: /languages
  * Requires PHP: 7.4
@@ -21,7 +21,7 @@ namespace MergeOrg\Sort;
 
 use MergeOrg\WpPluginSort\Container;
 use MergeOrg\WpPluginSort\Model\OrdersRecorder;
-use MergeOrg\WpPluginSort\Model\ProductSalesPeriodsUpdater;
+use MergeOrg\WpPluginSort\Model\ProductsSalesPeriodsUpdater;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -37,12 +37,12 @@ add_action(
 			$ordersRecorder = Container::get( OrdersRecorder::class );
 
 			/**
-			 * @var ProductSalesPeriodsUpdater $productSalesPeriodsUpdater
+			 * @var ProductsSalesPeriodsUpdater $productsSalesPeriodsUpdater
 			 */
-			$productSalesPeriodsUpdater = Container::get( ProductSalesPeriodsUpdater::class );
+			$productsSalesPeriodsUpdater = Container::get( ProductsSalesPeriodsUpdater::class );
 
-			$ordersRecorder->record();
-			$productSalesPeriodsUpdater->update();
+			// $ordersRecorder->record();
+			// $productSalesPeriodsUpdater->update();
 		}
 	}
 );

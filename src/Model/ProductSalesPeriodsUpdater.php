@@ -7,9 +7,6 @@ use MergeOrg\WpPluginSort\WordPress\ApiInterface;
 use MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product;
 
 /**
- * Class ProductSalesPeriodsUpdater
- *
- * @package MergeOrg\WpPluginSort\Action
  * @codeCoverageIgnore
  */
 final class ProductSalesPeriodsUpdater {
@@ -27,23 +24,18 @@ final class ProductSalesPeriodsUpdater {
 	}
 
 	/**
-	 * @param int $products
-	 * @return Product[]
+	 * @param Product $nonUpdatedSalesPeriodsProduct
+	 * @return void
 	 */
-	public function update( int $products = 5 ): array {
-		$nonUpdatedSalesPeriodsProducts = $this->api->getNonUpdatedSalesPeriodsProducts( $products );
-		foreach ( $nonUpdatedSalesPeriodsProducts as $product ) {
-			$this->api->updateProductSalesPeriodsLastUpdate( $product->getId() );
-			foreach ( $product->getSalesPeriods() as $salesPeriod ) {
-				$this->api->updateProductSalesPeriod(
-					$product->getId(),
-					$salesPeriod->getDays(),
-					$salesPeriod->getPurchaseSales(),
-					$salesPeriod->getQuantitySales()
-				);
-			}
+	public function update( Product $nonUpdatedSalesPeriodsProduct ): void {
+		$this->api->updateProductSalesPeriodsLastUpdate( $nonUpdatedSalesPeriodsProduct->getId() );
+		foreach ( $nonUpdatedSalesPeriodsProduct->getSalesPeriods() as $salesPeriod ) {
+			$this->api->updateProductSalesPeriod(
+				$nonUpdatedSalesPeriodsProduct->getId(),
+				$salesPeriod->getDays(),
+				$salesPeriod->getPurchaseSales(),
+				$salesPeriod->getQuantitySales()
+			);
 		}
-
-		return $nonUpdatedSalesPeriodsProducts;
 	}
 }

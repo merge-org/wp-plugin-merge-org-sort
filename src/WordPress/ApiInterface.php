@@ -37,6 +37,12 @@ interface ApiInterface {
 
 	/**
 	 * @param int $productId
+	 * @return Product
+	 */
+	public function getNonUpdatedSalesPeriodsProduct( int $productId ): Product;
+
+	/**
+	 * @param int $productId
 	 * @return void
 	 */
 	public function updateProductSalesPeriodsLastUpdate( int $productId ): void;
