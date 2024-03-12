@@ -9,6 +9,7 @@ use MergeOrg\WpPluginSort\Model\OrdersRecorder;
 use MergeOrg\WpPluginSort\WordPress\ApiInterface;
 use MergeOrg\WpPluginSort\Service\SalesIncrementer;
 use MergeOrg\WpPluginSort\Service\SalesPeriodManager;
+use MergeOrg\WpPluginSort\Model\RemainingOrdersNoticer;
 use MergeOrg\WpPluginSort\Model\ProductSalesPeriodsUpdater;
 use MergeOrg\WpPluginSort\Model\ProductsSalesPeriodsUpdater;
 
@@ -41,6 +42,7 @@ final class Container {
 			$productsSalesPeriodsUpdater = new ProductsSalesPeriodsUpdater( $api, $productSalesPeriodsUpdater );
 			$orderRecorder               = new OrderRecorder( $api, $salesIncrementer, $productSalesPeriodsUpdater );
 			$ordersRecorder              = new OrdersRecorder( $api, $orderRecorder );
+			$remainingOrdersNoticer      = new RemainingOrdersNoticer( $api );
 
 			self::$container[ Constants::class ]                   = $constants;
 			self::$container[ SalesPeriodManager::class ]          = $salesPeriodManager;
@@ -50,6 +52,7 @@ final class Container {
 			self::$container[ OrdersRecorder::class ]              = $ordersRecorder;
 			self::$container[ ProductSalesPeriodsUpdater::class ]  = $productSalesPeriodsUpdater;
 			self::$container[ ProductsSalesPeriodsUpdater::class ] = $productsSalesPeriodsUpdater;
+			self::$container[ RemainingOrdersNoticer::class ]      = $remainingOrdersNoticer;
 
 			self::$got = true;
 		}

@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Description: 📊Sort - Sales Order Ranking Tool | Powered by Merge
  * Author: Merge
  * Author URI: https://github.com/merge-org
- * Version: 1.2.0
+ * Version: 2.0.0
  * Text Domain: merge-org-sort
  * Domain Path: /languages
  * Requires PHP: 7.4
@@ -19,8 +19,12 @@ declare(strict_types=1);
 
 namespace MergeOrg\Sort;
 
+use WP_Query;
+use Exception;
 use MergeOrg\WpPluginSort\Container;
+use MergeOrg\WpPluginSort\Constants;
 use MergeOrg\WpPluginSort\Model\OrdersRecorder;
+use MergeOrg\WpPluginSort\Model\RemainingOrdersNoticer;
 use MergeOrg\WpPluginSort\Model\ProductsSalesPeriodsUpdater;
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -41,8 +45,86 @@ add_action(
 			 */
 			$productsSalesPeriodsUpdater = Container::get( ProductsSalesPeriodsUpdater::class );
 
-			// $ordersRecorder->record();
-			// $productSalesPeriodsUpdater->update();
+			$ordersRecorder->record();
+			$productsSalesPeriodsUpdater->update();
 		}
 	}
+);
+
+add_action(
+	'admin_notices',
+	/**
+	 * @throws Exception
+	 */
+	function (): void {
+		/**
+		 * @var RemainingOrdersNoticer $remainingOrdersNoticer
+		 */
+		$remainingOrdersNoticer = Container::get( RemainingOrdersNoticer::class );
+
+		$remainingOrdersNoticer->notice();
+	}
+);
+
+add_filter(
+	'manage_edit-product_columns',
+	function ( array $columns ): array {
+		/**
+		 * @var Constants $constants
+		 */
+		$constants = Container::get( Constants::class );
+
+		return array_replace( $columns, $constants->getProductColumns() );
+	}
+);
+
+add_action(
+	'pre_get_posts',
+	function ( WP_Query $query ): void {
+		/**
+		 * @var Constants $constants
+		 */
+		$constants = Container::get( Constants::class );
+
+		$productColumns = $constants->getProductColumnsForSorting();
+
+		$orderby = $query->get( 'orderby' );
+
+		if ( in_array( $orderby, array_values( $productColumns ) ) ) {
+			$query->set( 'meta_key', $orderby );
+			$query->set( 'orderby', 'meta_value_num' );
+		}
+	}
+);
+
+add_filter(
+	'manage_edit-product_sortable_columns',
+	function ( array $columns ): array {
+		/**
+		 * @var Constants $constants
+		 */
+		$constants = Container::get( Constants::class );
+
+		return array_replace( $columns, $constants->getProductColumnsForSorting() );
+	}
+);
+
+add_action(
+	'manage_product_posts_custom_column',
+	function ( string $column, int $postId ): void {
+		/**
+		 * @var Constants $constants
+		 */
+		$constants = Container::get( Constants::class );
+
+		$productColumns = $constants->getProductColumns();
+
+		if ( ! in_array( $column, array_keys( $productColumns ) ) ) {
+			return;
+		}
+
+		echo get_post_meta( $postId, $column, true );
+	},
+	10,
+	2
 );

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace MergeOrg\WpPluginSort\WordPress;
 
+use MergeOrg\WpPluginSort\Data\Sort\Product;
 use MergeOrg\WpPluginSort\Data\UnrecordedOrder\Order;
-use MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product;
 
 /**
  * @codeCoverageIgnore
@@ -15,6 +15,11 @@ interface ApiInterface {
 	 * @return Order[]
 	 */
 	public function getUnrecordedOrders( int $orders = 50 ): array;
+
+	/**
+	 * @return int
+	 */
+	public function getUnrecordedOrdersCount(): int;
 
 	/**
 	 * @param int $orderId
@@ -39,7 +44,7 @@ interface ApiInterface {
 	 * @param int $productId
 	 * @return Product
 	 */
-	public function getNonUpdatedSalesPeriodsProduct( int $productId ): Product;
+	public function getSortProduct( int $productId ): Product;
 
 	/**
 	 * @param int $productId

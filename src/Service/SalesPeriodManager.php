@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace MergeOrg\WpPluginSort\Service;
 
 use MergeOrg\WpPluginSort\Constants;
-use MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\SalesPeriod;
+use MergeOrg\WpPluginSort\Data\Sort\SalesPeriod;
 
 final class SalesPeriodManager {
 
@@ -45,12 +45,6 @@ final class SalesPeriodManager {
 		$purchaseSales = 0;
 		$quantitySales = 0;
 		foreach ( $sales as $date => $dailySales ) {
-			if ( $date === $today && $days === 1 ) {
-				$purchaseSales = $dailySales[ Constants::SALES_PURCHASE_KEY ];
-				$quantitySales = $dailySales[ Constants::SALES_QUANTITY_KEY ];
-				break;
-			}
-
 			if ( $date < $furthestDateInPast || $date > $today ) {
 				continue;
 			}

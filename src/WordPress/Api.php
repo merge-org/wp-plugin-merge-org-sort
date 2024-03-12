@@ -42,7 +42,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $products
-	 * @return \MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product[]
+	 * @return \MergeOrg\WpPluginSort\Data\Sort\Product[]
 	 */
 	public function getNonUpdatedSalesPeriodsProducts( int $products = 5 ): array {
 		$dev  = ( $_ENV['APP_ENV'] ?? 'production' ) === 'dev';
@@ -83,7 +83,7 @@ final class Api implements ApiInterface {
 		 * @var WP_Post $product
 		 */
 		foreach ( $products_ as $product ) {
-			$products[] = $this->getNonUpdatedSalesPeriodsProduct( $product->ID );
+			$products[] = $this->getSortProduct( $product->ID );
 		}
 
 		return $products;
@@ -91,13 +91,57 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $productId
-	 * @return \MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product
+	 * @return \MergeOrg\WpPluginSort\Data\Sort\Product
 	 */
-	public function getNonUpdatedSalesPeriodsProduct( int $productId ): \MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product {
+	public function getSortProduct( int $productId ): \MergeOrg\WpPluginSort\Data\Sort\Product {
 		$sales        = get_post_meta( $productId, $this->constants->getSalesMetaKey(), true ) ?: array();
 		$salesPeriods = $this->salesPeriodManager->getAllSalesPeriods( $sales );
 
-		return new \MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product( $productId, $salesPeriods );
+		return new \MergeOrg\WpPluginSort\Data\Sort\Product( $productId, $salesPeriods );
+	}
+
+	/**
+	 * @return int
+	 * @throws Exception
+	 */
+	public function getUnrecordedOrdersCount(): int {
+		$statuses = array_diff(
+			array_keys( wc_get_order_statuses() ),
+			array(
+				'trash',
+				'wc-pending',
+				'wc-on-hold',
+				'wc-refunded',
+				'wc-failed',
+				'wc-checkout-draft',
+				'wc-cancelled',
+			)
+		);
+
+		$args = array(
+			'post_type'      => 'shop_order',
+			'posts_per_page' => 1,
+			'orderby'        => 'ID',
+			'order'          => 'DESC',
+			'post_status'    => $statuses,
+			'meta_query'     => array(
+				array(
+					'key'     => $this->constants->getRecordedMetaKey(),
+					'compare' => 'NOT EXISTS',
+					'value'   => '',
+				),
+			),
+			'date_query'     => array(
+				array(
+					'before'    => date( 'Y-m-d 23:59:59', strtotime( '-1 days' ) ),
+					'inclusive' => true,
+				),
+			),
+		);
+
+		$query = new WP_Query( $args );
+
+		return $query->found_posts;
 	}
 
 	/**
@@ -105,6 +149,10 @@ final class Api implements ApiInterface {
 	 * @throws Exception
 	 */
 	public function getUnrecordedOrders( int $orders = 10 ): array {
+		$dev  = ( $_ENV['APP_ENV'] ?? 'production' ) === 'dev';
+		$date = date( 'Y-m-d 00:00:00', strtotime( '-1 days' ) );
+		$dev && ( $date = date( 'Y-m-d 00:00:00', strtotime( '+1 days' ) ) );
+
 		$statuses = array_diff(
 			array_keys( wc_get_order_statuses() ),
 			array(
@@ -122,7 +170,7 @@ final class Api implements ApiInterface {
 			'post_type'      => 'shop_order',
 			'posts_per_page' => $orders,
 			'orderby'        => 'ID',
-			'order'          => 'ASC',
+			'order'          => 'DESC',
 			'post_status'    => $statuses,
 			'meta_query'     => array(
 				array(
@@ -133,7 +181,7 @@ final class Api implements ApiInterface {
 			),
 			'date_query'     => array(
 				array(
-					'after'     => date( 'Y-m-d 00:00:00', strtotime( '-365 days' ) ),
+					'before'    => $date,
 					'inclusive' => true,
 				),
 			),

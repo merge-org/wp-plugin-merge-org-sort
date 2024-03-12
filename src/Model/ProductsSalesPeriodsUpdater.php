@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace MergeOrg\WpPluginSort\Model;
 
+use MergeOrg\WpPluginSort\Data\Sort\Product;
 use MergeOrg\WpPluginSort\WordPress\ApiInterface;
-use MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct\Product;
 
 /**
  * @codeCoverageIgnore

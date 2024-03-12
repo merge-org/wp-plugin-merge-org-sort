@@ -57,9 +57,9 @@ final class OrderRecorder {
 				);
 			$this->api->updateProductSales( $lineItem->getProduct()->getId(), $incrementedSales );
 			$this->productSalesPeriodUpdater->update(
-				$this->api->getNonUpdatedSalesPeriodsProduct(
+				$this->api->getSortProduct(
 					$lineItem->getProduct()
-																											->getId()
+																						->getId()
 				)
 			);
 			if ( $lineItem->getProductVariation() ) {

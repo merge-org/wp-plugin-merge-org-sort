@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace MergeOrg\WpPluginSort\Data\NonUpdatedSalesPeriodsProduct;
+namespace MergeOrg\WpPluginSort\Data\Sort;
 
 use JsonSerializable;
 

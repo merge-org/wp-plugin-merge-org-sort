@@ -83,7 +83,7 @@ final class Constants {
 	 * @return string
 	 */
 	public function getRecordedMetaKey(): string {
-		return $this->normalizeMetaKey( self::META_KEY_RECORDED );
+		return $this->normalizeMetaKey( self::META_KEY_RECORDED, true );
 	}
 
 	/**
@@ -116,7 +116,23 @@ final class Constants {
 	 * @return string
 	 */
 	public function getRecordedDateTimeMetaKey(): string {
-		return $this->normalizeMetaKey( self::META_KEY_RECORDED_DATE_TIME );
+		return $this->normalizeMetaKey( self::META_KEY_RECORDED_DATE_TIME, true );
+	}
+
+	/**
+	 * @return array<string, string>
+	 */
+	public function getProductColumns(): array {
+		$productColumns = array();
+		foreach ( $this->getSalesPeriodDays() as $salesPeriodDay ) {
+			if ( $salesPeriodDay === 1 ) {
+				continue;
+			}
+
+			$productColumns[ $this->getSalesPeriodPurchaseMetaKey( $salesPeriodDay ) ] = self::SALES_PERIODS[ $salesPeriodDay ][1];
+		}
+
+		return $productColumns;
 	}
 
 	/**
@@ -134,6 +150,23 @@ final class Constants {
 		$metaKey = $this->normalizeMetaKey( self::META_KEY_SALES_PERIOD_PURCHASE );
 
 		return "$metaKey-$days";
+	}
+
+	/**
+	 * @return array<string, string>
+	 */
+	public function getProductColumnsForSorting(): array {
+		$productColumns = array();
+		foreach ( $this->getSalesPeriodDays() as $salesPeriodDay ) {
+			if ( $salesPeriodDay === 1 ) {
+				continue;
+			}
+
+			$productColumns[ $this->getSalesPeriodPurchaseMetaKey( $salesPeriodDay ) ] =
+				$this->getSalesPeriodPurchaseMetaKey( $salesPeriodDay );
+		}
+
+		return $productColumns;
 	}
 
 	/**
