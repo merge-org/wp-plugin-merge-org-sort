@@ -40,32 +40,25 @@ final class Constants {
 	 */
 	private const SALES_PERIODS = array(
 		1   => array(
-			'daily',
-			'Daily',
+			'slug' => 'daily',
 		),
 		7   => array(
-			'weekly',
-			'Weekly',
+			'slug' => 'weekly',
 		),
 		15  => array(
-			'semi_monthly',
-			'Semi-Monthly',
+			'slug' => 'semi_monthly',
 		),
 		30  => array(
-			'monthly',
-			'Monthly',
+			'slug' => 'monthly',
 		),
 		90  => array(
-			'quarterly',
-			'Quarterly',
+			'slug' => 'quarterly',
 		),
 		180 => array(
-			'semi_annually',
-			'Semi-Annually',
+			'slug' => 'semi_annually',
 		),
 		365 => array(
-			'yearly',
-			'Yearly',
+			'slug' => 'yearly',
 		),
 	);
 
@@ -129,7 +122,8 @@ final class Constants {
 				continue;
 			}
 
-			$productColumns[ $this->getSalesPeriodPurchaseMetaKey( $salesPeriodDay ) ] = self::SALES_PERIODS[ $salesPeriodDay ][1];
+			$productColumns[ $this->getSalesPeriodPurchaseMetaKey( $salesPeriodDay ) ] =
+				$this->getTranslatedProductColumnBySlug( self::SALES_PERIODS[ $salesPeriodDay ]['slug'] );
 		}
 
 		return $productColumns;
@@ -150,6 +144,24 @@ final class Constants {
 		$metaKey = $this->normalizeMetaKey( self::META_KEY_SALES_PERIOD_PURCHASE );
 
 		return "$metaKey-$days";
+	}
+
+	/**
+	 * @param string $slug
+	 * @return string
+	 */
+	private function getTranslatedProductColumnBySlug( string $slug ): string {
+		$labels = array(
+			'daily'         => __( 'Daily', 'merge-org-sort' ),
+			'weekly'        => __( 'Weekly', 'merge-org-sort' ),
+			'semi_monthly'  => __( 'Semi-Monthly', 'merge-org-sort' ),
+			'monthly'       => __( 'Monthly', 'merge-org-sort' ),
+			'quarterly'     => __( 'Quarterly', 'merge-org-sort' ),
+			'semi_annually' => __( 'Semi-Annually', 'merge-org-sort' ),
+			'yearly'        => __( 'Yearly', 'merge-org-sort' ),
+		);
+
+		return $labels[ $slug ] ?? '';
 	}
 
 	/**
