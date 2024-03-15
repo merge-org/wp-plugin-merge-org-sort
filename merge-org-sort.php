@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Description: 📊Sort - Sales Order Ranking Tool | Powered by Merge
  * Author: Merge
  * Author URI: https://github.com/merge-org
- * Version: 2.0.0
+ * Version: 2.0.1
  * Text Domain: merge-org-sort
  * Domain Path: /languages
  * Requires PHP: 7.4
@@ -30,6 +30,8 @@ use MergeOrg\WpPluginSort\Model\ProductsSalesPeriodsUpdater;
 require_once __DIR__ . '/vendor/autoload.php';
 
 file_exists( $devActionsFilePath = __DIR__ . '/src/dev-inc/dev-actions.php' ) && require_once $devActionsFilePath;
+
+// TODO ADD STATIC CLASS METHODS AS CALLBACKS IN ORDER TO BE REMOVED FROM THE PRO VERSION
 
 add_action(
 	'init',
@@ -123,8 +125,9 @@ add_action(
 			return;
 		}
 
+		// TODO API CALL
 		echo get_post_meta( $postId, $column, true );
 	},
-	10,
+	17,
 	2
 );

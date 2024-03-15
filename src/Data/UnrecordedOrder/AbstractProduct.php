@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MergeOrg\WpPluginSort\Data\UnrecordedOrder;
 
 use JsonSerializable;
+use MergeOrg\WpPluginSort\WordPress\ApiInterface;
 
 /**
  * @codeCoverageIgnore
@@ -49,7 +50,7 @@ abstract class AbstractProduct implements JsonSerializable {
 	/**
 	 * @return array<string, array<string, int>>
 	 */
-	public function getSales(): array {
-		return $this->sales;
+	public function getSales( bool $cached = true, ?ApiInterface $api = null ): array {
+		return $cached ? $this->sales : $api->getProductSales( $this->getId() );
 	}
 }

@@ -51,7 +51,7 @@ final class OrderRecorder {
 		foreach ( $nonRecordedOrder->getLineItems() as $lineItem ) {
 			$incrementedSales =
 				$this->salesIncrementer->increment(
-					$lineItem->getProduct()->getSales(),
+					$lineItem->getProduct()->getSales( false, $this->api ),
 					$lineItem->getQuantity(),
 					$nonRecordedOrder->getDateTime()->format( 'Y-m-d' )
 				);

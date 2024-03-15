@@ -28,6 +28,12 @@ interface ApiInterface {
 	public function setOrderRecorded( int $orderId ): void;
 
 	/**
+	 * @param int $productId
+	 * @return array<string, array<string, int>>
+	 */
+	public function getProductSales( int $productId ): array;
+
+	/**
 	 * @param int                               $productId
 	 * @param array<string, array<string, int>> $sales
 	 * @return void

@@ -221,21 +221,21 @@ final class Api implements ApiInterface {
 	}
 
 	/**
-	 * TODO CHECK THE POSSIBILITY OF USING CACHE
-	 *
 	 * @param int $orderId
 	 * @return WC_Order|null
 	 */
 	private function getOrder( int $orderId ): ?WC_Order {
-		// if($order = ($this->orderCache[$orderId] ?? FALSE)) {
-		// return $order;
-		// }
-		//
-		// return ($order = wc_get_order($orderId)) ? $this->orderCache[$orderId] = $order : NULL;
-
 		$order = wc_get_order( $orderId );
 
 		return $order instanceof WC_Order ? $order : null;
+	}
+
+	/**
+	 * @param int $productId
+	 * @return array<string, array<string, int>>
+	 */
+	public function getProductSales( int $productId ): array {
+		return get_post_meta( $productId, $this->constants->getSalesMetaKey(), true ) ?: array();
 	}
 
 	/**
@@ -285,18 +285,10 @@ final class Api implements ApiInterface {
 	}
 
 	/**
-	 * TODO CHECK THE POSSIBILITY OF USING CACHE
-	 *
 	 * @param int $productId
 	 * @return WC_Product|null
 	 */
 	private function getProduct( int $productId ): ?WC_Product {
-		// if($product = ($this->productCache[$productId] ?? FALSE)) {
-		// return $product;
-		// }
-		//
-		// return ($product = wc_get_product($productId)) ? $this->productCache[$productId] = $product : NULL;
-
 		$product = wc_get_product( $productId );
 
 		return $product instanceof WC_Product ? $product : null;
