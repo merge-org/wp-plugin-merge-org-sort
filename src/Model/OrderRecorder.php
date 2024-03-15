@@ -47,6 +47,10 @@ final class OrderRecorder {
 	 * @return void
 	 */
 	public function record( Order $nonRecordedOrder ): void {
+		if ( $this->api->isOrderRecorded( $nonRecordedOrder->getId() ) ) {
+			return;
+		}
+
 		$this->api->setOrderRecorded( $nonRecordedOrder->getId() );
 		foreach ( $nonRecordedOrder->getLineItems() as $lineItem ) {
 			$incrementedSales =

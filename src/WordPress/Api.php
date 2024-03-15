@@ -255,6 +255,14 @@ final class Api implements ApiInterface {
 	}
 
 	/**
+	 * @param int $orderId
+	 * @return bool
+	 */
+	public function isOrderRecorded( int $orderId ): bool {
+		return get_post_meta( $orderId, $this->constants->getRecordedMetaKey(), true ) === 'yes';
+	}
+
+	/**
 	 * @param int $productId
 	 * @return void
 	 */

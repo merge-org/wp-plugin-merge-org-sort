@@ -23,6 +23,12 @@ interface ApiInterface {
 
 	/**
 	 * @param int $orderId
+	 * @return bool
+	 */
+	public function isOrderRecorded( int $orderId ): bool;
+
+	/**
+	 * @param int $orderId
 	 * @return void
 	 */
 	public function setOrderRecorded( int $orderId ): void;
