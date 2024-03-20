@@ -243,12 +243,11 @@ final class Api implements ApiInterface {
 	 * @return void
 	 */
 	public function setOrderRecorded( int $orderId ): void {
-		if ( ! ( $order = $this->getOrder( $orderId ) )
-			|| $order->get_meta( $this->constants->getRecordedMetaKey() ) === 'yes'
-		) {
+		if ( $this->isOrderRecorded( $orderId ) ) {
 			return;
 		}
 
+		$order = wc_get_order( $orderId );
 		$order->update_meta_data( $this->constants->getRecordedMetaKey(), 'yes' );
 		$order->update_meta_data( $this->constants->getRecordedDateTimeMetaKey(), date( 'Y-m-d H:i:s' ) );
 		$order->save();
