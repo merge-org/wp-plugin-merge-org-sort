@@ -8,7 +8,6 @@ use WP_Query;
 use DateTime;
 use WC_Order;
 use Exception;
-use WC_Product;
 use MergeOrg\WpPluginSort\Constants;
 use MergeOrg\WpPluginSort\Data\UnrecordedOrder\Order;
 use MergeOrg\WpPluginSort\Service\SalesPeriodManager;
@@ -42,6 +41,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $products
+	 *
 	 * @return \MergeOrg\WpPluginSort\Data\Sort\Product[]
 	 */
 	public function getNonUpdatedSalesPeriodsProducts( int $products = 5 ): array {
@@ -91,6 +91,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $productId
+	 *
 	 * @return \MergeOrg\WpPluginSort\Data\Sort\Product
 	 */
 	public function getSortProduct( int $productId ): \MergeOrg\WpPluginSort\Data\Sort\Product {
@@ -222,6 +223,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $orderId
+	 *
 	 * @return WC_Order|null
 	 */
 	private function getOrder( int $orderId ): ?WC_Order {
@@ -232,6 +234,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $productId
+	 *
 	 * @return array<string, array<string, int>>
 	 */
 	public function getProductSales( int $productId ): array {
@@ -240,6 +243,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $orderId
+	 *
 	 * @return void
 	 */
 	public function setOrderRecorded( int $orderId ): void {
@@ -247,14 +251,12 @@ final class Api implements ApiInterface {
 			return;
 		}
 
-		$order = wc_get_order( $orderId );
-		$order->update_meta_data( $this->constants->getRecordedMetaKey(), 'yes' );
-		$order->update_meta_data( $this->constants->getRecordedDateTimeMetaKey(), date( 'Y-m-d H:i:s' ) );
-		$order->save();
+		update_post_meta( $orderId, $this->constants->getRecordedMetaKey(), 'yes' );
 	}
 
 	/**
 	 * @param int $orderId
+	 *
 	 * @return bool
 	 */
 	public function isOrderRecorded( int $orderId ): bool {
@@ -263,15 +265,11 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $productId
+	 *
 	 * @return void
 	 */
 	public function updateProductSalesPeriodsLastUpdate( int $productId ): void {
-		if ( ! ( $product = wc_get_product( $productId ) ) ) {
-			return;
-		}
-
-		$product->update_meta_data( $this->constants->getSalesPeriodsLastUpdateMetaKey(), date( 'Y-m-d H:i:s' ) );
-		$product->save();
+		update_post_meta( $productId, $this->constants->getSalesPeriodsLastUpdateMetaKey(), date( 'Y-m-d H:i:s' ) );
 	}
 
 	/**
@@ -279,39 +277,21 @@ final class Api implements ApiInterface {
 	 * @param int $days
 	 * @param int $purchaseSales
 	 * @param int $quantitySales
+	 *
 	 * @return void
 	 */
 	public function updateProductSalesPeriod( int $productId, int $days, int $purchaseSales, int $quantitySales ): void {
-		if ( ! ( $product = $this->getProduct( $productId ) ) ) {
-			return;
-		}
-
-		$product->update_meta_data( $this->constants->getSalesPeriodPurchaseMetaKey( $days ), $purchaseSales );
-		$product->update_meta_data( $this->constants->getSalesPeriodQuantityMetaKey( $days ), $quantitySales );
-		$product->save();
-	}
-
-	/**
-	 * @param int $productId
-	 * @return WC_Product|null
-	 */
-	private function getProduct( int $productId ): ?WC_Product {
-		$product = wc_get_product( $productId );
-
-		return $product instanceof WC_Product ? $product : null;
+		update_post_meta( $productId, $this->constants->getSalesPeriodPurchaseMetaKey( $days ), $purchaseSales );
+		update_post_meta( $productId, $this->constants->getSalesPeriodQuantityMetaKey( $days ), $quantitySales );
 	}
 
 	/**
 	 * @param int                               $productId
 	 * @param array<string, array<string, int>> $sales
+	 *
 	 * @return void
 	 */
 	public function updateProductSales( int $productId, array $sales ): void {
-		if ( ! ( $product = $this->getProduct( $productId ) ) ) {
-			return;
-		}
-
-		$product->update_meta_data( $this->constants->getSalesMetaKey(), $sales );
-		$product->save();
+		update_post_meta( $productId, $this->constants->getSalesMetaKey(), $sales );
 	}
 }

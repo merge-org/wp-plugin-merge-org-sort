@@ -128,6 +128,11 @@ final class ActionsRegistrar {
 	 */
 	public static function recordOrdersAndUpdateProducts(): void {
 		if ( wp_doing_cron() ) {
+			if ( time() % 2 === 0 ) {
+				// In order to avoid order sales collisions
+				return;
+			}
+
 			/**
 			 * @var OrdersRecorder $ordersRecorder
 			 */
@@ -158,6 +163,7 @@ final class ActionsRegistrar {
 
 	/**
 	 * @param array<string, string> $columns
+	 *
 	 * @return array<string, string>
 	 */
 	public static function filterProductColumns( array $columns ): array {
@@ -171,6 +177,7 @@ final class ActionsRegistrar {
 
 	/**
 	 * @param array<string, string> $columns
+	 *
 	 * @return array<string, string>
 	 */
 	public static function filterSortableProductColumns( array $columns ): array {
@@ -185,6 +192,7 @@ final class ActionsRegistrar {
 	/**
 	 * @param string $column
 	 * @param int    $postId
+	 *
 	 * @return void
 	 */
 	public static function showSalesInProductCell( string $column, int $postId ) {
@@ -204,6 +212,7 @@ final class ActionsRegistrar {
 
 	/**
 	 * @param WP_Query $query
+	 *
 	 * @return void
 	 */
 	public static function hookSalesMetaKeyInWpQuery( WP_Query $query ): void {
