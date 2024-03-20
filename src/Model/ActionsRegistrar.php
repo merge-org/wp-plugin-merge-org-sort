@@ -77,6 +77,11 @@ final class ActionsRegistrar {
 	);
 
 	/**
+	 * @var array<string, float>
+	 */
+	public static array $showSalesIndex = array();
+
+	/**
 	 * @return void
 	 */
 	public static function register(): void {
@@ -186,7 +191,18 @@ final class ActionsRegistrar {
 		 */
 		$constants = Container::get( Constants::class );
 
-		return array_replace( $columns, $constants->getProductColumnsForSorting() );
+		$columnsForSorting_ = $constants->getProductColumnsForSorting();
+		$columnsForSorting  = array();
+		$index              = 0;
+		foreach ( $columnsForSorting_ as $item => $value ) {
+			if ( $index === 0 ) {
+				$columnsForSorting[ $item ] = $value;
+			}
+
+			++$index;
+		}
+
+		return array_replace( $columns, $columnsForSorting );
 	}
 
 	/**
@@ -207,6 +223,22 @@ final class ActionsRegistrar {
 			return;
 		}
 
+		$disallowedColumns = array(
+			$constants->getSalesPeriodPurchaseMetaKey( 1 ),
+			$constants->getSalesPeriodPurchaseMetaKey( 15 ),
+			$constants->getSalesPeriodPurchaseMetaKey( 30 ),
+			$constants->getSalesPeriodPurchaseMetaKey( 90 ),
+			$constants->getSalesPeriodPurchaseMetaKey( 180 ),
+			$constants->getSalesPeriodPurchaseMetaKey( 365 ),
+		);
+
+		if ( in_array( $column, $disallowedColumns ) && ( self::$showSalesIndex[ $column ] ?? 0 ) >= 3 ) {
+			echo '<pre>PRO</pre>';
+
+			return;
+		}
+		self::$showSalesIndex[ $column ] = self::$showSalesIndex[ $column ] ?? 0;
+		++self::$showSalesIndex[ $column ];
 		echo get_post_meta( $postId, $column, true );
 	}
 
