@@ -45,7 +45,7 @@ final class Api implements ApiInterface {
 	 */
 	public function getNonUpdatedSalesPeriodsProducts( int $products = 5 ): array {
 		$dev  = ( $_ENV['APP_ENV'] ?? 'production' ) === 'dev';
-		$date = date( 'Y-m-d 00:00:00', strtotime( '-2 days' ) );
+		$date = date( 'Y-m-d 23:59:59', strtotime( '-1 days' ) );
 		$dev && ( $date = date( 'Y-m-d 00:00:00', strtotime( '+1 days' ) ) );
 		$dev && ( $products = 100 );
 
