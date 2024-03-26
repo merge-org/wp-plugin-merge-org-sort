@@ -236,7 +236,8 @@ final class ActionsRegistrar {
 		}
 		self::$showSalesIndex[ $column ] = self::$showSalesIndex[ $column ] ?? 0;
 		++self::$showSalesIndex[ $column ];
-		echo get_post_meta( $postId, $column, true );
+		echo get_post_meta( $postId, $column, true )
+			. '(' . ( get_post_meta( $postId, str_replace( 'purchase', 'quantity', $column ), true ) ?: 0 ) . ')';
 	}
 
 	/**
