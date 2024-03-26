@@ -33,7 +33,7 @@ final class OrdersRecorder {
 	/**
 	 * @return Order[]
 	 */
-	public function record( int $orders = 10 ): array {
+	public function record( int $orders = 5 ): array {
 		$nonRecordedOrders = $this->api->getUnrecordedOrders( $orders );
 		foreach ( $nonRecordedOrders as $nonRecordedOrder ) {
 			$this->orderRecorder->record( $nonRecordedOrder );

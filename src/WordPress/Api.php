@@ -51,7 +51,7 @@ final class Api implements ApiInterface {
 
 		$args = array(
 			'post_type'      => 'product',
-			'posts_per_page' => 1,
+			'posts_per_page' => $products,
 			'post_status'    => array(
 				'publish',
 				'draft',
@@ -119,7 +119,7 @@ final class Api implements ApiInterface {
 
 		$args = array(
 			'post_type'      => 'shop_order',
-			'posts_per_page' => 1,
+			'posts_per_page' => 5,
 			'orderby'        => 'ID',
 			'order'          => 'DESC',
 			'post_status'    => $statuses,
@@ -147,7 +147,7 @@ final class Api implements ApiInterface {
 	 * @return Order[]
 	 * @throws Exception
 	 */
-	public function getUnrecordedOrders( int $orders = 10 ): array {
+	public function getUnrecordedOrders( int $orders = 5 ): array {
 		$dev  = ( $_ENV['APP_ENV'] ?? 'production' ) === 'dev';
 		$date = date( 'Y-m-d 00:00:00', strtotime( '-1 days' ) );
 		$dev && ( $date = date( 'Y-m-d 00:00:00', strtotime( '+1 days' ) ) );
@@ -167,7 +167,7 @@ final class Api implements ApiInterface {
 
 		$args = array(
 			'post_type'      => 'shop_order',
-			'posts_per_page' => 1,
+			'posts_per_page' => $orders,
 			'orderby'        => 'ID',
 			'order'          => 'DESC',
 			'post_status'    => $statuses,
