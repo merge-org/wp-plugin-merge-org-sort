@@ -41,11 +41,12 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $products
+	 *
 	 * @return \MergeOrg\WpPluginSort\Data\Sort\Product[]
 	 */
 	public function getNonUpdatedSalesPeriodsProducts( int $products = 5 ): array {
 		$dev  = ( $_ENV['APP_ENV'] ?? 'production' ) === 'dev';
-		$date = date( 'Y-m-d 23:59:59', strtotime( '-2 days' ) );
+		$date = date( 'Y-m-d 23:59:59', strtotime( '-5 days' ) );
 		$dev && ( $date = date( 'Y-m-d 00:00:00', strtotime( '+1 days' ) ) );
 		$dev && ( $products = 100 );
 
@@ -90,6 +91,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $productId
+	 *
 	 * @return \MergeOrg\WpPluginSort\Data\Sort\Product
 	 */
 	public function getSortProduct( int $productId ): \MergeOrg\WpPluginSort\Data\Sort\Product {
@@ -221,6 +223,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $orderId
+	 *
 	 * @return WC_Order|null
 	 */
 	private function getOrder( int $orderId ): ?WC_Order {
@@ -231,6 +234,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $productId
+	 *
 	 * @return array<string, array<string, int>>
 	 */
 	public function getProductSales( int $productId ): array {
@@ -239,6 +243,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $orderId
+	 *
 	 * @return void
 	 */
 	public function setOrderRecorded( int $orderId ): void {
@@ -251,6 +256,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $orderId
+	 *
 	 * @return bool
 	 */
 	public function isOrderRecorded( int $orderId ): bool {
@@ -259,6 +265,7 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $productId
+	 *
 	 * @return void
 	 */
 	public function updateProductSalesPeriodsLastUpdate( int $productId ): void {
@@ -270,6 +277,7 @@ final class Api implements ApiInterface {
 	 * @param int $days
 	 * @param int $purchaseSales
 	 * @param int $quantitySales
+	 *
 	 * @return void
 	 */
 	public function updateProductSalesPeriod( int $productId, int $days, int $purchaseSales, int $quantitySales ): void {
@@ -280,6 +288,7 @@ final class Api implements ApiInterface {
 	/**
 	 * @param int                               $productId
 	 * @param array<string, array<string, int>> $sales
+	 *
 	 * @return void
 	 */
 	public function updateProductSales( int $productId, array $sales ): void {
