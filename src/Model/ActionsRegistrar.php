@@ -85,6 +85,8 @@ final class ActionsRegistrar {
 	 * @return void
 	 */
 	public static function register(): void {
+		$_ENV['MERGE_ORG_SORT_PRO'] = true;
+
 		add_action(
 			'init',
 			self::RECORD_ORDERS_AND_UPDATE_PRODUCTS_ACTION['action'],
@@ -168,6 +170,7 @@ final class ActionsRegistrar {
 
 	/**
 	 * @param array<string, string> $columns
+	 *
 	 * @return array<string, string>
 	 */
 	public static function filterProductColumns( array $columns ): array {
@@ -181,6 +184,7 @@ final class ActionsRegistrar {
 
 	/**
 	 * @param array<string, string> $columns
+	 *
 	 * @return array<string, string>
 	 */
 	public static function filterSortableProductColumns( array $columns ): array {
@@ -193,7 +197,7 @@ final class ActionsRegistrar {
 		$columnsForSorting  = array();
 		$index              = 0;
 		foreach ( $columnsForSorting_ as $item => $value ) {
-			if ( $index === 0 ) {
+			if ( $index === 0 || ( $_ENV['MERGE_ORG_SORT_PRO'] ?? false ) ) {
 				$columnsForSorting[ $item ] = $value;
 			}
 
@@ -206,6 +210,7 @@ final class ActionsRegistrar {
 	/**
 	 * @param string $column
 	 * @param int    $postId
+	 *
 	 * @return void
 	 */
 	public static function showSalesInProductCell( string $column, int $postId ) {
@@ -229,8 +234,10 @@ final class ActionsRegistrar {
 			$constants->getSalesPeriodPurchaseMetaKey( 365 ),
 		);
 
-		if ( in_array( $column, $disallowedColumns ) && ( self::$showSalesIndex[ $column ] ?? 0 ) >= 3 ) {
-			echo '<pre>PRO</pre>';
+		if ( ! ( $_ENV['MERGE_ORG_SORT_PRO'] ?? false ) &&
+			in_array( $column, $disallowedColumns ) &&
+			( self::$showSalesIndex[ $column ] ?? 0 ) >= 3 ) {
+			echo "<code style='font-size: .75em'>PRO</code>";
 
 			return;
 		}
@@ -242,6 +249,7 @@ final class ActionsRegistrar {
 
 	/**
 	 * @param WP_Query $query
+	 *
 	 * @return void
 	 */
 	public static function hookSalesMetaKeyInWpQuery( WP_Query $query ): void {

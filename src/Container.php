@@ -30,6 +30,7 @@ final class Container {
 
 	/**
 	 * @param string $key
+	 *
 	 * @return mixed
 	 */
 	public static function get( string $key ) {
@@ -53,6 +54,7 @@ final class Container {
 			self::$container[ ProductSalesPeriodsUpdater::class ]  = $productSalesPeriodsUpdater;
 			self::$container[ ProductsSalesPeriodsUpdater::class ] = $productsSalesPeriodsUpdater;
 			self::$container[ RemainingOrdersNoticer::class ]      = $remainingOrdersNoticer;
+			self::$container['production']                         = ( $_ENV['APP_ENV'] ?? 'production' ) === 'production';
 
 			self::$got = true;
 		}
