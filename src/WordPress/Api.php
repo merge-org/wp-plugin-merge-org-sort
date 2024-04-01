@@ -41,7 +41,6 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $products
-	 *
 	 * @return \MergeOrg\WpPluginSort\Data\Sort\Product[]
 	 */
 	public function getNonUpdatedSalesPeriodsProducts( int $products = 5 ): array {
@@ -91,7 +90,6 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $productId
-	 *
 	 * @return \MergeOrg\WpPluginSort\Data\Sort\Product
 	 */
 	public function getSortProduct( int $productId ): \MergeOrg\WpPluginSort\Data\Sort\Product {
@@ -106,53 +104,7 @@ final class Api implements ApiInterface {
 	 * @throws Exception
 	 */
 	public function getUnrecordedOrdersCount(): int {
-		$statuses = array_diff(
-			array_keys( wc_get_order_statuses() ),
-			array(
-				'trash',
-				'wc-pending',
-				'wc-on-hold',
-				'wc-refunded',
-				'wc-failed',
-				'wc-checkout-draft',
-				'wc-cancelled',
-			)
-		);
-
-		$args = array(
-			'post_type'      => 'shop_order',
-			'posts_per_page' => 5,
-			'orderby'        => 'ID',
-			'order'          => 'DESC',
-			'post_status'    => $statuses,
-			'meta_query'     => array(
-				array(
-					'key'     => $this->constants->getRecordedMetaKey(),
-					'compare' => 'NOT EXISTS',
-					'value'   => '',
-				),
-			),
-			'date_query'     => array(
-				array(
-					'before'    => date( 'Y-m-d 23:59:59', strtotime( '-1 days' ) ),
-					'inclusive' => true,
-				),
-			),
-		);
-
-		$query = new WP_Query( $args );
-
-		return $query->found_posts;
-	}
-
-	/**
-	 * @return Order[]
-	 * @throws Exception
-	 */
-	public function getUnrecordedOrders( int $orders = 5 ): array {
-		$dev  = ( $_ENV['APP_ENV'] ?? 'production' ) === 'dev';
 		$date = date( 'Y-m-d 23:59:59', strtotime( '-1 days' ) );
-		$dev && ( $date = date( 'Y-m-d 00:00:00', strtotime( '+1 days' ) ) );
 
 		$statuses = array_diff(
 			array_keys( wc_get_order_statuses() ),
@@ -168,19 +120,16 @@ final class Api implements ApiInterface {
 		);
 
 		$args = array(
-			'post_type'      => 'shop_order',
-			'posts_per_page' => $orders,
-			'orderby'        => 'ID',
-			'order'          => 'DESC',
-			'post_status'    => $statuses,
-			'meta_query'     => array(
-				array(
-					'key'     => $this->constants->getRecordedMetaKey(),
-					'compare' => 'NOT EXISTS',
-					'value'   => '',
-				),
-			),
-			'date_query'     => array(
+			'paginate'     => true,
+			'limit'        => 5,
+			'orderby'      => 'ID',
+			'order'        => 'DESC',
+			'status'       => $statuses,
+			// TODO
+			// WE NEED TO FIND A WAY THIS TO MOVE TO `META_QUERY`
+			'meta_key'     => $this->constants->getRecordedMetaKey(),
+			'meta_compare' => 'NOT EXISTS',
+			'date_query'   => array(
 				array(
 					'before'    => $date,
 					'inclusive' => true,
@@ -188,19 +137,55 @@ final class Api implements ApiInterface {
 			),
 		);
 
-		$query   = new WP_Query( $args );
-		$orders_ = $query->get_posts();
+		$orders = wc_get_orders( $args );
+
+		return $orders->total;
+	}
+
+	/**
+	 * @return Order[]
+	 * @throws Exception
+	 */
+	public function getUnrecordedOrders( int $orders = 5 ): array {
+		$date = date( 'Y-m-d 23:59:59', strtotime( '-1 days' ) );
+
+		$statuses = array_diff(
+			array_keys( wc_get_order_statuses() ),
+			array(
+				'trash',
+				'wc-pending',
+				'wc-on-hold',
+				'wc-refunded',
+				'wc-failed',
+				'wc-checkout-draft',
+				'wc-cancelled',
+			)
+		);
+
+		$args = array(
+			'limit'        => $orders,
+			'orderby'      => 'ID',
+			'order'        => 'DESC',
+			'status'       => $statuses,
+			// TODO
+			// WE NEED TO FIND A WAY THIS TO MOVE TO `META_QUERY`
+			'meta_key'     => $this->constants->getRecordedMetaKey(),
+			'meta_compare' => 'NOT EXISTS',
+			'date_query'   => array(
+				array(
+					'before'    => $date,
+					'inclusive' => true,
+				),
+			),
+		);
+
+		$orders_ = wc_get_orders( $args );
 		$orders  = array();
 
 		/**
 		 * @var WP_Post $order
 		 */
 		foreach ( $orders_ as $order ) {
-			$order = $this->getOrder( $order->ID );
-			if ( ! $order ) {
-				continue;
-			}
-
 			$lineItems = array();
 			foreach ( $order->get_items() as $item ) {
 				$data             = $item->get_data();
@@ -222,8 +207,42 @@ final class Api implements ApiInterface {
 	}
 
 	/**
+	 * @param int $productId
+	 * @return array<string, array<string, int>>
+	 */
+	public function getProductSales( int $productId ): array {
+		return get_post_meta( $productId, $this->constants->getSalesMetaKey(), true ) ?: array();
+	}
+
+	/**
 	 * @param int $orderId
-	 *
+	 * @return void
+	 */
+	public function setOrderRecorded( int $orderId ): void {
+		if ( $this->isOrderRecorded( $orderId ) ) {
+			return;
+		}
+
+		if ( $order = $this->getOrder( $orderId ) ) {
+			$order->update_meta_data( $this->constants->getRecordedMetaKey(), 'yes' );
+			$order->save();
+		}
+	}
+
+	/**
+	 * @param int $orderId
+	 * @return bool
+	 */
+	public function isOrderRecorded( int $orderId ): bool {
+		if ( $order = $this->getOrder( $orderId ) ) {
+			return $order->get_meta( $this->constants->getRecordedMetaKey() ) === 'yes';
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param int $orderId
 	 * @return WC_Order|null
 	 */
 	private function getOrder( int $orderId ): ?WC_Order {
@@ -234,38 +253,6 @@ final class Api implements ApiInterface {
 
 	/**
 	 * @param int $productId
-	 *
-	 * @return array<string, array<string, int>>
-	 */
-	public function getProductSales( int $productId ): array {
-		return get_post_meta( $productId, $this->constants->getSalesMetaKey(), true ) ?: array();
-	}
-
-	/**
-	 * @param int $orderId
-	 *
-	 * @return void
-	 */
-	public function setOrderRecorded( int $orderId ): void {
-		if ( $this->isOrderRecorded( $orderId ) ) {
-			return;
-		}
-
-		update_post_meta( $orderId, $this->constants->getRecordedMetaKey(), 'yes' );
-	}
-
-	/**
-	 * @param int $orderId
-	 *
-	 * @return bool
-	 */
-	public function isOrderRecorded( int $orderId ): bool {
-		return get_post_meta( $orderId, $this->constants->getRecordedMetaKey(), true ) === 'yes';
-	}
-
-	/**
-	 * @param int $productId
-	 *
 	 * @return void
 	 */
 	public function updateProductSalesPeriodsLastUpdate( int $productId ): void {
@@ -277,7 +264,6 @@ final class Api implements ApiInterface {
 	 * @param int $days
 	 * @param int $purchaseSales
 	 * @param int $quantitySales
-	 *
 	 * @return void
 	 */
 	public function updateProductSalesPeriod( int $productId, int $days, int $purchaseSales, int $quantitySales ): void {
@@ -288,7 +274,6 @@ final class Api implements ApiInterface {
 	/**
 	 * @param int                               $productId
 	 * @param array<string, array<string, int>> $sales
-	 *
 	 * @return void
 	 */
 	public function updateProductSales( int $productId, array $sales ): void {
