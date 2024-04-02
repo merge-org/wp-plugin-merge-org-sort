@@ -204,10 +204,11 @@ final class Api implements ApiInterface {
 		}
 
 		$logger = wc_get_logger();
-		if ( $logger ) {
-			$orders = json_encode( $orders, JSON_PRETTY_PRINT );
-			$time   = date( 'Y-m-d H:i:s' );
-			$logger->info( "Orders found for cron($time): $orders", array( 'source' => 'merge-org-sort' ) );
+		// Do not log everything
+		if ( $logger && rand( 1, 5 ) === 1 ) {
+			$ordersForLogging = json_encode( $orders, JSON_PRETTY_PRINT );
+			$time             = date( 'Y-m-d H:i:s' );
+			$logger->info( "Orders found for cron($time): $ordersForLogging", array( 'source' => 'merge-org-sort' ) );
 		}
 
 		return $orders;
