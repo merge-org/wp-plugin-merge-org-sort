@@ -203,6 +203,13 @@ final class Api implements ApiInterface {
 				new Order( $order->get_id(), new DateTime( $order->get_date_created()->format( 'Y-m-d H:i:s' ) ), $lineItems );
 		}
 
+		$logger = wc_get_logger();
+		if ( $logger ) {
+			$orders = json_encode( $orders, JSON_PRETTY_PRINT );
+			$time   = date( 'Y-m-d H:i:s' );
+			$logger->info( "Orders found for cron($time): $orders", array( 'source' => 'merge-org-sort' ) );
+		}
+
 		return $orders;
 	}
 

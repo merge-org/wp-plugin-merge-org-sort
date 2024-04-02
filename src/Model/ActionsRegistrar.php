@@ -128,6 +128,29 @@ final class ActionsRegistrar {
 			self::HOOK_SALES_META_KEY_IN_WP_QUERY['priority'] ?? 10,
 			self::HOOK_SALES_META_KEY_IN_WP_QUERY['acceptedArgs'] ?? 1
 		);
+
+		add_action(
+			'admin_head',
+			function () {
+				echo '<style>
+				th[class*="column-merge-org-sort-sales_period_purchase-"] { 
+					background-color: whitesmoke !important;
+					border-left: 1px solid lightgray;
+					border-bottom: 1px solid lightgray;
+				}
+			
+				th[class*="column-merge-org-sort-sales_period_purchase-"] span:first-of-type{ 
+					font-size: .9em;
+				}
+				
+				td[class*="column-merge-org-sort-sales_period_purchase-"] { 
+					border-left: 1px solid lightgray;
+					border-bottom: 1px solid lightgray;
+				}
+			
+			</style>';
+			}
+		);
 	}
 
 	/**
